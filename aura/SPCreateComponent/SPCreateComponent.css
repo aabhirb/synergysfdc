@@ -1,0 +1,14 @@
+/**
+ * Created by abidap on 1/20/19.
+ */
+
+.THIS .slds-modal__container{
+       max-width: 70rem !important;
+       width:70% !important;
+
+}
+
+.THIS .modal-container .slds-modal__container{
+       max-width: 70rem !important;
+       width:70% !important;
+}

@@ -1,0 +1,75 @@
+<!--
+ - Created by abhishekbidap on 9/1/19.
+ -->
+
+<aura:component description="BannerComponent" controller="BannerComponentController"
+                implements="flexipage:availableForRecordHome,force:hasRecordId,flexipage:availableForAllPageTypes">
+    <!-- Handlers -->
+    <aura:handler value="{!this}" name="init" action="{!c.doInit}" />
+    <!-- Handlers -->
+
+    <!-- LightningUtil component -->
+    <c:LightningUtil aura:id='LightningUtil-BannerComponent' />
+    <!-- LightningUtil component -->
+    <aura:attribute name="instance" type="Object" />
+
+    <lightning:card variant="base">
+        <aura:set attribute="actions"></aura:set>
+        <lightning:layout class="slds-m-left_small">
+            <lightning:layoutItem size="6">
+                <div class="slds-grid">
+                    <div class="slds-col">
+                        <aura:if isTrue="{!!v.instance.doNotEmailVal}">
+                            <lightning:icon iconName="utility:check" alternativeText="success" variant="success" size="small" />
+
+                            <span class="slds-m-left_small slds-m-right_small slds-text-title--caps">
+                            Can Send Email
+                        </span>
+                            <aura:set attribute="else">
+                                <lightning:icon iconName="utility:warning" alternativeText="warning" variant="warning" size="small" />
+
+                                <span class="slds-m-left_small slds-m-right_small slds-text-title--caps">
+                                    Email Opt Out
+                                </span>
+
+                            </aura:set>
+                        </aura:if>
+
+                        <lightning:buttonIcon iconName="utility:rotate" variant="bare" onclick="{! c.handleEmailToggle }" alternativeText="Settings" />
+
+                    </div>
+
+                </div>
+
+            </lightning:layoutItem>
+            <!--<lightning:layoutItem size="2">
+                <div style="border-left:1px solid black">
+                </div>
+            </lightning:layoutItem>-->
+            <lightning:layoutItem size="6">
+
+                <div class="slds-col">
+                    <aura:if isTrue="{!!v.instance.doNotCallVal}">
+                        <lightning:icon iconName="utility:check" alternativeText="success" variant="success" size="small" />
+
+                        <span class="slds-m-left_small slds-m-right_small slds-text-title--caps">
+                            Can Call
+                        </span>
+                        <aura:set attribute="else">
+                            <lightning:icon iconName="utility:warning" alternativeText="warning" variant="warning" size="small" />
+
+                            <span class="slds-m-left_small slds-m-right_small slds-text-title--caps">
+                                    Opted out of Calls
+                                </span>
+
+                        </aura:set>
+                    </aura:if>
+
+                    <lightning:buttonIcon iconName="utility:rotate" variant="bare" onclick="{! c.handleCallToggle }" alternativeText="Settings" />
+                </div>
+            </lightning:layoutItem>
+
+        </lightning:layout>
+    </lightning:card>
+
+</aura:component>

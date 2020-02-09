@@ -1,0 +1,154 @@
+<!--
+ - Created by abidap on 2/2/19.
+ -->
+
+<aura:component description="VCCreateComponent" controller="CustomLeadConvertController">
+
+    <aura:attribute type="String" name="recordTypeIdAttr"  access="global" default="" />
+    <aura:attribute type="String" name="activeSection" default="general-information" />
+    <aura:attribute type="String" name="searchKeyAttr" />
+    <aura:attribute type="Object[]"  name="addressListCaptured" />
+    <aura:attribute type="Boolean" name="showOtherleadSource" />
+
+    <aura:handler event="c:GoogleAutoCompleteCmpEvent"  action="{!c.handleComponentEvent}"/>
+
+    <lightning:overlayLibrary aura:id="overlayLibModal"/>
+
+    <!-- LightningUtil component -->
+    <c:LightningUtil aura:id='LightningUtil-VCCreateComponent' />
+    <!-- LightningUtil component -->
+
+
+    <lightning:recordEditForm aura:id="recordViewForm" recordTypeId="{!v.recordTypeIdAttr}" objectApiName="Lead"
+                              onerror="{!c.handleError}" onsuccess="{!c.handleSuccess}"  >
+
+        <lightning:messages />
+
+        <lightning:accordion activeSectionName="{!v.activeSection}">
+
+            <lightning:accordionSection label="General Information" name="general-information">
+
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="FirstName" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="LastName" />
+                    </lightning:layoutItem>
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Email" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="MobilePhone" />
+                    </lightning:layoutItem>
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="LeadSource" onchange="{!c.onChangeOfLeadSource}" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <aura:if isTrue="{!v.showOtherleadSource}">
+                            <lightning:inputField fieldName="Other_Lead_Source__c"  />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Vendor_Type__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem size="12" padding="around-small" >
+                        <center>
+                            <lightning:button name="nextAction" variant="brand" label="Next" onclick="{!c.onNextAction}" />
+                        </center>
+                    </lightning:layoutItem>
+
+                </lightning:layout>
+
+            </lightning:accordionSection>
+
+            <lightning:accordionSection label="Company Information" name="company-information">
+
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Company" />
+                        <span style="color:red">  * Company Information Consultant belongs to. </span>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Title" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Address_Type__c" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <c:GoogleAutoCompleteCmp searchlabel="Address" searchKey="{!v.searchKeyAttr}" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Website" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="LeadSource" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem size="12" padding="around-small" >
+                        <center>
+                            <lightning:button name="nextAction" variant="brand" label="Next" onclick="{!c.onCompanyNextAction}" />
+                        </center>
+                    </lightning:layoutItem>
+
+                </lightning:layout>
+
+            </lightning:accordionSection>
+
+            <lightning:accordionSection label="Additional Information" name="additional-information">
+
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Products_Services_Offered__c" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Special_Deals_for_Synergy__c" />
+                    </lightning:layoutItem>
+                    <lightning:layoutItem  size="6" padding="around-small">
+                        <lightning:inputField fieldName="Lead_entered_by__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="around-small">
+                        <lightning:inputField fieldName="Lead_Credit_Assigned_To__c"  />
+                    </lightning:layoutItem>
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="Description" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem size="12" padding="around-small" >
+                        <center>
+                            <center> <lightning:button aura:id="submit" type="submit" label="Create Lead" class="slds-m-top_small" /> </center>
+                        </center>
+                    </lightning:layoutItem>
+                </lightning:layout>
+
+            </lightning:accordionSection>
+
+        </lightning:accordion>
+
+    </lightning:recordEditForm>
+
+</aura:component>

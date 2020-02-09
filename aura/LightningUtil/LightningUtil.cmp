@@ -1,0 +1,28 @@
+<!--
+ - Created by abidap on 12/27/18.
+ -->
+
+<aura:component description="LightningUtil">
+
+    <lightning:navigation aura:id="navService"/>
+    
+    <aura:method name="invokeServerAction" action="{!c.makeServerInvocation}" access="global" description="This method is used to make Server invocations">
+        <aura:attribute name="actionParam" type="Object" description="this will be the Action method which needs to be invoked"  />
+        <aura:attribute name="actionParamStr" type="String" description="this will be the Action method which needs to be invoked"  />
+    </aura:method>
+
+    <aura:method name="fireToastEventAction" action="{!c.fireToastAction}" access="global" description="This method is used to show Toast">
+        <aura:attribute name="type" type="String" description="this will be the type of toast event " access="public" />
+        <aura:attribute name="Message" type="String" description="this will be the message of toast event " access="public" />
+
+    </aura:method>
+
+    <!-- Aura Methods -->
+    <aura:method name="navigateToRecord" action="{!c.navigateToRecord}"
+                 description="Helper method to navigate to desired components">
+        <aura:attribute name="recordToNavigateAttr" type="String" />
+        <aura:attribute name="sobjectToNavigate" type="String" />
+    </aura:method>
+    <!-- Aura Methods -->
+
+</aura:component>

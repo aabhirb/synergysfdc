@@ -1,0 +1,82 @@
+<!--
+ - Created by abidap on 1/12/19.
+ -->
+
+<apex:page id="GPNoMatchNotificationBanner" standardController="Contact" extensions="GPNoMatchNotificationBannerController" lightningStylesheets="true">
+    <style>
+
+       .slds-scope .slds-theme_info{
+            background-color: red !important;
+        }
+ 
+    </style>
+    <apex:slds />
+    <apex:includeLightning /> 
+    
+    <apex:outputPanel rendered="{!futureMatchLst.size == 0 && !isEmailSent}">
+        <div class="slds-scope">
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_info" role="alert">
+                <span class="slds-assistive-text">info</span>
+                <span class="slds-icon_container slds-icon-utility-user slds-m-right_x-small" title="Description of icon when needed">
+                    <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
+                        <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#info_alt" xmlns:xlink="http://www.w3.org/1999/xlink"></use>
+                    </svg>
+                </span>
+
+                <apex:outputPanel rendered="{!!isSPContact && !isGPFromNonServiceAbleStates}">
+                    <h2 >  There is no potential Provider Match for this Practice. Click  <a style="margin-right:2px; margin-left:2px; " href="#" onclick="sendEmailAction(false);" >  HERE  </a>  to send email to Practice. ( Before clicking on the link, try expanding the search criteria to see if some minor changes can increase their chances of a match. ) </h2>
+                </apex:outputPanel>
+
+                <apex:outputPanel rendered="{!!isSPContact && isGPFromNonServiceAbleStates}">
+                    <h2 >  The Practice is not serviceable by Synergy, Please Click  <a style="margin-right:2px; margin-left:2px; " href="#" onclick="sendEmailAction(true);" >  HERE  </a>  to send email to Practice. </h2>
+                </apex:outputPanel>
+
+
+                <apex:outputPanel rendered="{!isSPContact}">
+                    <h2 >  There is no potential Practice Match for this Provider. Click  <a style="margin-right:2px; margin-left:2px; " href="#" onclick="sendEmailAction(false);" >  HERE  </a>  to send email to Provider.  ( Before clicking on the link, try expanding the search criteria to see if some minor changes can increase their chances of a match. ) </h2>
+                </apex:outputPanel>
+
+            </div>
+        </div>
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{!futureMatchLst.size == 0 && isEmailSent}">
+        <div class="slds-scope">
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_info" role="alert">
+                <span class="slds-assistive-text">info</span>
+                <span class="slds-icon_container slds-icon-utility-user slds-m-right_x-small" title="Description of icon when needed">
+                    <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
+                        <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#info_alt" xmlns:xlink="http://www.w3.org/1999/xlink"></use>
+                    </svg>
+                </span>
+                <h2 >  There is no potential Match for this contact and contact has been notified via Email </h2>
+            </div>
+        </div>
+    </apex:outputPanel>
+
+    <script>
+
+        function sendEmailAction(isNonServiceAble){
+
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.GPNoMatchNotificationBannerController.sendEmail}',
+                '{!accountId}',isNonServiceAble,
+                function(result, event){
+                    if (event.status) {
+                        window.location.reload();
+                    } else if (event.type === 'exception') {
+                        document.getElementById("responseErrors").innerHTML =
+                            event.message + "<br/>\n<pre>" + event.where + "</pre>";
+                    } else {
+                        document.getElementById("responseErrors").innerHTML = event.message;
+                    }
+                },
+                {escape: true}
+            );
+
+        }
+
+
+
+    </script>
+</apex:page>

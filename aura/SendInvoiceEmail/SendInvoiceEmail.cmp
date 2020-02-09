@@ -1,0 +1,20 @@
+<!--
+ - Created by abhishek on 2019-09-19.
+ -->
+<aura:component description="SendInvoiceEmail" controller="SendInvoiceEmailCtrlr"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" >
+	<lightning:quickActionAPI aura:id="quickActionAPI"/>
+
+    <!-- Handlers -->
+    <aura:handler value="{!this}" name="init" action="{!c.doInit}" />
+    
+    <!-- Handlers -->
+
+    <!-- LightningUtil component -->
+    <c:LightningUtil aura:id='LightningUtil-SendInvoiceEmail' />
+    <!-- LightningUtil component -->
+
+    <lightning:overlayLibrary aura:id="overlayLibModal"/>
+    
+
+</aura:component>

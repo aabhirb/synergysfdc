@@ -1,0 +1,12 @@
+/**
+ * Created by abidap on 1/3/19.
+ */
+.THIS .fillColor{
+    background-color : lightgrey;
+}
+.THIS .fillColorQueued{
+    background-color : orange;
+}
+.THIS .IgnoreFillColor{
+    color : black;
+}

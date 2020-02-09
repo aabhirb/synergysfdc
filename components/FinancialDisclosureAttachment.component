@@ -1,0 +1,9 @@
+<apex:component controller="FinancialDisclosureAttachmentController" access="global">
+    <apex:attribute name="optyId"
+        description="Opportunity Id"
+        assignTo="{!opportunityObjectId}"
+        type="Id" />
+    <apex:attribute name="isPrimary" description="To Check Primary Contact" assignTo="{!isPrimaryCheck}" type="Boolean"/>
+
+    <apex:outputText value="{!PageContents}" escape="false" />
+</apex:component>

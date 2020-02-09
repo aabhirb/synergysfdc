@@ -1,0 +1,23 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" access="global" 
+                controller="ProviderChecklistController" >
+    
+    <aura:attribute name="checkboxWrapper" type="ProviderChecklistController.CheckboxWrapper[]" />
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}" />
+    <lightning:overlayLibrary aura:id="overlayLib"/>
+    <lightning:card title="Provider Preparation Checklist">
+        <p class="slds-p-horizontal_small slds-grid slds-wrap">
+            
+            <aura:iteration items="{!v.checkboxWrapper}" var="wrapper">
+                <div class="slds-p-around_xx-small">
+                <lightning:button label="{!wrapper.label}" 
+                                  iconName="{!wrapper.value ? 'action:approval' : ''}" 
+                                  name = "{!wrapper.fieldApiName}"
+                                  value="{!wrapper}"
+                                  onclick="{!c.handleShowModal}"
+                                   variant ="{!wrapper.value ? 'brand' : 'neutral'}"/>
+                                         </div>
+            </aura:iteration>
+        </p>
+    </lightning:card>
+
+</aura:component>

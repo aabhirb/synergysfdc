@@ -1,0 +1,220 @@
+<!--
+ - Created by abidap on 2/19/19.
+ -->
+
+<apex:component id="SPSendIntake" controller="WelcomeGPEmailCtrlr" access="global">
+
+    <apex:attribute name="leadId" type="Id" access="GLOBAL" description="Id for which data needs to be shown" assignTo="{!idToRetreive}" />
+
+    Dear Dr. {!leadSObj.LastName},
+
+    <br/>
+
+    <p> Thank you for your interest in Synergy Specialists.
+        We are an agency that represent hundreds of talented specialists across the country to match them with highly productive GP practices interested in offering specialty in-house. </p>
+
+    <p>
+        We support specialists by screening for the best practices, facilitating contracts, processing credentialing, training staff,
+        tracking treatment days, and invoicing on your behalf to make sure you get paid correctly and on time.
+    </p>
+
+    <p>
+        If you, like most specialists, are frustrated by the lack of options and are seeking more valuable production days in your schedule, there are better options out there.
+
+    </p>
+
+    <p>
+        Please fill out a full <a href="{!$Label.WP_URL_Provider}">application</a>. We’ll then schedule a call with you discuss how Synergy Specialists can support your career.
+
+    </p>
+
+
+    <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Endo' )}">
+        <br/>
+        <b> Synergy Endodontists: Provider Overview </b> <br/>
+        <b> Typical Production: </b> over $6,500/day <br/>
+        <b> Typical Compensation: </b> 50% of adjusted production <br/>
+        <b> Insurance Credentialing: </b>  Endodontists are selective about which insurance plans they go in network with due to the range in reimbursement rates. Our endodontists dictate that the practice bill at least $1,000/molar endo. <br/>
+        <b> Procedures Performed: </b> RCT, retreats, apico <br/>
+        <b> Equipment: </b> The majority of our endodontists are accustomed to practicing with high powered surgical loupes, and bring in their own endo specific equipment including: handpieces, rotary files, and gutta percha heating equipment. The practice is responsible for the sundries and endo disposables like accessory paper points, bibs, and lidocaine. Some endodontists require a microscope. In that case, the practice is expected to provide the stand while the specialist brings the optics. <br/>
+
+
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Perio' )}">
+        <br/>
+        <b> Synergy Periodontists: Provider Overview </b> <br/>
+        <b> Typical Production: </b> over $12,000/day <br/>
+        <b> Typical Compensation: </b> 50% of adjusted production <br/>
+        <b> Insurance Credentialing: </b>  Periodontists are generally more flexible with insurance credentialing and will usually mirror whatever the practice is already credentialed with. <br/>
+        <b> Procedures Performed: </b> Connective tissue grafts, osseous pocket reduction, bone grafting, ridge augmentation, sinus lifts, frenectomy, crown lengthening, and partial/full bony 3rd molar extractions. <br/>
+        <b> Equipment: </b>  Perio supplies expense responsibility are as follows: 50/50 on implant fixtures, bone graft, and membrane. The periodontist brings in all the regenerative materials and implant fixtures, along with surgical cassettes and implant motors/contra angles. The majority of our Periodontists use a panoramic unit for surgical implant placement, and do not use a surgical guide. Few require a CT/Cone Beam. <br/>
+
+
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{! contains( leadSObj.Specialties_sent_for_intake__c , 'Ortho') }">
+        <br/>
+        <b> Synergy Orthodontists: Provider Overview </b> <br/>
+        <b> Typical Production: </b> A healthy referral base after 6 months should produce between $4,000-$6,000/day <br/>
+        <b> Typical Compensation: </b> Per diem ($1,250 - $2,000) + bonus for each new case start and finish <br/>
+        <b> Insurance Credentialing: </b>  Since orthodontists are paid on a per diem plus a bonus per each new case start, Orthodontists are happy to see as many insurance consults as you can line up.  <br/>
+        <b> Procedures Performed: </b> All ortho cases in the practice, including clear aligners, conventional braces, and appliances. <br/>
+        <b> Equipment: </b>   The practice is responsible for purchasing all the orthodontic supplies and instrument as well as providing the orthodontic assistant. If you need help sourcing an assistant or purchasing supplies, please let us know. We have fantastic relationships with distributors and manufacturers. Regarding radiology, it’s highly recommended to have a Ceph unit within the practice. <br/>
+
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{! contains( leadSObj.Specialties_sent_for_intake__c , 'Pedo') }">
+        <br/>
+        <b> Synergy Pedodontists: Provider Overview </b> <br/>
+        <b> Typical Production: </b> Highly varies depending on operator skill, quality of the facility, and comfort with sedation dentistry, anywhere from $6,000 to $12,000/day.<br/>
+        <b> Typical Compensation: </b> Per diem ($1,250 - $2,000) + bonus for each new case start and finish<br/>
+        <b> Insurance Credentialing: </b>  Since orthodontists are paid on a per diem plus a bonus per each new case start, Orthodontists are happy to see as many insurance consults as you can line up. <br/>
+        <b> Procedures Performed: </b> All ortho cases in the practice, including clear aligners, conventional braces, and appliances.<br/>
+        <b> Equipment: </b>  The practice is responsible for purchasing all the orthodontic supplies and instrument as well as providing the orthodontic assistant. If you need help sourcing an assistant or purchasing supplies, please let us know. We have fantastic relationships with distributors and manufacturers. Regarding radiology, it’s highly recommended to have a Ceph unit within the practice. <br/>
+
+
+    </apex:outputPanel>
+
+   <!-- <apex:outputPanel rendered="{! contains(  leadSObj.Specialties_sent_for_intake__c , 'Endo') }">
+        <b> Typical Production: </b> Highly varies depending on operator skill, quality of the facility, and comfort with sedation dentistry, anywhere from $6,000 to $12,000/day.<br/>
+        <b> Typical Compensation: </b> Per diem ($1,250 - $2,000) + bonus for each new case start and finish<br/>
+        <b> Insurance Credentialing: </b>  Since orthodontists are paid on a per diem plus a bonus per each new case start, Orthodontists are happy to see as many insurance consults as you can line up. <br/>
+        <b> Procedures Performed: </b> All ortho cases in the practice, including clear aligners, conventional braces, and appliances.<br/>
+        <b> Equipment: </b>   The practice is responsible for purchasing all the orthodontic supplies and instrument as well as providing the orthodontic assistant. If you need help sourcing an assistant or purchasing supplies, please let us know. We have fantastic relationships with distributors and manufacturers. Regarding radiology, it’s highly recommended to have a Ceph unit within the practice. <br/>
+
+    </apex:outputPanel> -->
+
+    <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Anesth') }">
+        <br/>
+        <b> Synergy Anesthesiologists: Provider Overview </b> <br/>
+        <b> Typical Compensation: </b> $400 - $800/hr with a minimum 2 cases per trip, increasing to 4 hours per trip, if there’s greater travel distance.<br/>
+        <b> Insurance Credentialing: </b>  None <br/>
+        <b> Procedures Performed: </b> IV Anesthesia, Deep Sedation, Conscious Sedation.<br/>
+        <b> Equipment: </b>   Anesthesiologist bring in all sedation meds, equipment, and carry a dual MD DDS degree. <br/>
+
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Oral') }">
+        <br/>
+        <b> Synergy Oral Surgeon: Provider Overview </b> <br/>
+        <b> Typical Production: </b> over $12,000/day<br/>
+        <b> Typical Compensation: </b> 50% of adjusted production.<br/>
+        <b> Insurance Credentialing: </b>   Practice owner’s preference <br/>
+        <b> Procedures Performed: </b> Predominantly 3rd molar extractions, implants, bone augmentation, and expose &amp; bond procedures. Biopsy are not typically performed due to the challenge of following up between the pathology lab &amp; patient.<br/>
+        <b> Equipment: </b>  The surgeon brings in most of the surgical &amp; sedation equipment &amp; supplies. The cost of surgical assistant and surgical supplies (implant/regeneratives) is split 50/50 with the practice owner. <br/>
+
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Advance') }">
+        <br/>
+        <b> Synergy Advanced GPs : Provider Overview </b> <br/>
+        <b> Typical Production: </b> $5,000 - $10,000/day<br/>
+        <b> Typical Compensation: </b> 40% - 50% of adjusted production.<br/>
+        <b> Insurance Credentialing: </b>   Provider preference but more often are likely to go in-network vs a specialist, bear in mind a GP does not demand higher specialty fees from the insurance panels. <br/>
+        <b> Procedures Performed: </b> Oral Surgery, Implantology, Molar Endo, Ortho, &amp; Pedo.<br/>
+        <b> Equipment: </b>   The GP surgeon brings in most of the surgical &amp; sedation equipment &amp; supplies. The cost of surgical assistant and surgical supplies (implant/regeneratives) is split 50/50 with the GP. <br/>
+
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Prostho') }">
+        <br/>
+        <b> Synergy Prosthodontists : Provider Overview </b> <br/>
+        <b> Typical Production: </b> Surgical $12,000/day | Surgical + Prosthetic $20,000/day <br/>
+        <b> Typical Compensation: </b> 50% of adjusted production.<br/>
+        <b> Insurance Credentialing: </b>  Most of the types of cases are not covered by insurance so it’s best to go out of network.  <br/>
+        <b> Procedures Performed: </b>All of our Prosthodontist place implants as well and can be of assistance for restoring implant cases, not limited to full arch implant dentistry.<br/>
+        <b> Equipment: </b>    The cost of Lab Fees and, implant fixtures are split between both parties.  <br/>
+
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'gpRec') }">
+
+        <p>
+
+            While Synergy Specialists is primarily an agency for specialists, our vast network often connects us with GP’s seeking associateship.
+            In contrast to matching our specialists, we charge a recruitment fee of $6,000 to the practice owner. 50% upon confirmation of hire, and the remainder 50% on the 90 day hire anniversary.
+            To get started please email Darius@SynergySpecialists.com about your candidate hire position, including any compensation details you can provide.
+
+        </p>
+
+
+    </apex:outputPanel>
+
+
+    <apex:outputPanel rendered="{! leadSObj.Specialties_sent_for_intake__c == null || leadSObj.Specialties_sent_for_intake__c == 'null' }">
+        <br/>
+        <b>Synergy Specialists: Provider Overview</b><br/>
+        <b>Typical Production: </b> $6,000 - $12,000, depending on specialty and operator skill<br/>
+        <b>Typical Compensation: </b> 50% of adjusted production<br/>
+        <b>Insurance Credentialing:</b>  Many of our specialists are flexible with insurance credentialing as long as practices can provide a full schedule with solid production numbers while avoiding provider burnout.
+        An added bonus is that specialists command higher reimbursement rates from insurance companies.<br/>
+        <b>Procedures Performed:</b>  A good start to discover what specialty would be the right fit for your practice would be to consider your patient demographic mix and what procedures you’re already referring out.<br/>
+        <b>Equipment:</b> Most specialists bring in their own small equipment while your practice provides the disposable sundries.<br/>
+
+    </apex:outputPanel>
+
+    <!-- <apex:outputPanel rendered="{!leadSObj.Specialties_sent_for_intake__c == 'Anesthe'}">
+        <p>
+            Anesthesiologists typically charge by the hour, with a number of minimum hours for a trip.
+            At the anesthesiologists discretion of hourly preferred hourly rate Usually 2 - 4 hours hours depending on the travelling distance is on average within an hour.
+            They bring in all the sedation meds, equipment, and carry a rare dual MD DDS degree.
+
+        </p>
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{!leadSObj.Specialties_sent_for_intake__c == 'Pedo'}">
+        <p>
+            Pedodontist’s production is completely dependent on operator skill, the cases you line up, and the quality of facility and staff.
+            Though typically they will be compensated 50%, calculated on adjusted production. During your face to face meeting with the specialist we’ll provide a framework to come to an understanding of how to optimize the experience.
+        </p>
+    </apex:outputPanel> -->
+
+    <p>
+        To learn more about how Synergy Specialists work, please view our Frequently Asked Questions. <br/>
+        <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Ortho') }">
+        <a href="https://docs.google.com/document/d/1BWrRZwOUA8uKUECH3_0MJKh2ExpYnU44MG8sXwnkw4M/edit"> Synergy Specialists - Orthodontist Provider FAQ </a>
+            <br/>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Perio') }">
+        <a href="https://docs.google.com/document/d/16qsJQ_B14rjsnpgKgAivEtYtz70Q4WMdLuQO1Iy95vE/edit"> Synergy Specialists - Periodontists Provider FAQ </a>
+            <br/>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Endo') }">
+        <a href="https://docs.google.com/document/d/1LpavsgtTOdrIi1opjDyHsYtogXGrzk5KoS1PRzywhNw/edit"> Synergy Specialists - Endodontists Provider FAQ </a>
+            <br/>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!contains( leadSObj.Specialties_sent_for_intake__c , 'Oral') }">
+        <a href="https://docs.google.com/document/d/1smTnzEkT-rO10WDM-is4b0kB0K6aMvhXzlqqCgzFWDo/edit"> Synergy Specialists - Oral Surgeon Provider FAQ </a>
+            <br/>
+        </apex:outputPanel>
+
+
+    </p>
+
+     <table style="width:100%;" cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+            <td style="width:25%; padding-right:10px; padding-bottom: 10px; vertical-align:top; text-align:left;" valign="top" rowspan="1" align="left">
+                <img style="width:100%; height:auto; margin-bottom: 20px; border:0;" border="0" alt="Synergy Specialists Logo"  src="https://ascendorthodontics--devchavi--c.documentforce.com/servlet/servlet.ImageServer?id=0150x0000009xDp&oid=00D0x0000008yCO&lastMod=1551654388000"/>
+                <p style="font-family: Helvetica, sans-serif; font-size: 15px; line-height: 20px; color: #515151; letter-spacing: 1px; text-transform:uppercase; margin-left: 50px; margin-bottom: 1px;"><strong>DARIUS SOMEKHIAN</strong></p>
+                <p style="font-family: Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.2px; color: #515151; font-weight: 100; margin-left:50px; margin-top:1px;">Chief Executive Officer</p>
+                <p style="margin-left: 50px;"><span><a href="https://www.facebook.com/SynergySpecialists/" target="_blank"> <img border="0" width="27" alt="Facebook icon" style="border:0; height:27px; width:27px" src="https://ascendorthodontics--devchavi--c.visualforce.com/resource/1554855393000/fb_image"/></a> </span>
+                    <span><a href="https://www.linkedin.com/company/synergy-specialists-co/" target="_blank"><img border="0" width="27" alt="Linkedin icon" style="border:0; height:27px; width:27px" src="https://ascendorthodontics--c.visualforce.com/resource/1554870286000/linkedin_image?"/></a> </span>
+                    <span><a href="https://www.instagram.com/synergyspecialists/" target="_blank"><img border="0" width="27" alt="Instagram icon" style="border:0; height:27px; width:27px" src="https://ascendorthodontics--devchavi--c.visualforce.com/resource/1554855393000/insta_image"/></a> </span></p>
+            </td>
+            <td style="width:75%; padding-bottom:10px; padding-left:10px;" valign="top">
+                <hr style="border-top: 3px solid #90b5a3; margin-top: 50px; margin-bottom: 42px;"/>
+                <p style="font-family: Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.2px; color: #515151; font-weight: 100; margin-bottom:5px;"><span style="padding-right: 14px; color:#90b5a3;"><strong>T:</strong></span><a style="text-decoration:none; color:#515151;" href="tel:3104002531">(310) 400-2531</a></p>
+                <p style="font-family: Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.2px; color: #515151; font-weight: 100; margin-top: 5px; margin-bottom:5px;"><span style="padding-right: 13px; color:#90b5a3;"><strong>E:</strong></span><a style="text-decoration:none; color:#515151;" href="mailto:Darius@SynergySpecialists.com">Darius@SynergySpecialists.com</a></p>
+                <p style="font-family: Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.2px; color: #515151; font-weight: 100; margin-top:5px;"><span style="padding-right: 10px; color:#90b5a3;"><strong>W:</strong></span><a style="text-decoration:none; color:#515151;" target="_blank" href="https://synergyspecialists.com">SynergySpecialists.com</a></p>
+            </td>
+        </tr>
+        <tr>
+            <td style="font-size:11px; line-height:15px; font-weight:100; word-spacing: -1px; letter-spacing: 0.2px; border-top:#e5e5e5 2px solid; font-family: Helvetica, sans-serif; padding-top:10px; color:#8c8c8c; text-align:justify; vertical-align:top;" align="justify" valign="top" colspan="2" margin-top="15px">
+                <p style="padding-right: 10px; padding-left: 10px;"><strong>CONFIDENTIALITY NOTICE:</strong> This e-mail transmission (including attachments) may contain confidential or legally privileged information that is intended only for the individual or entity named in the email address. If you are not the intended recipient, you are hereby notified that any disclosure, copying, distribution or reliance upon the contents of this e-mail is strictly prohibited. If you have received this e-mail transmission in error, please notify the sender of the delivery error by replying to this message, then delete it from your system, and destroy all copies. Thank you!</p>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</apex:component>

@@ -1,0 +1,31 @@
+<aura:component implements="flexipage:availableForAllPageTypes,force:hasRecordId" access="global" controller="UpdateOpptController">
+    <lightning:notificationsLibrary aura:id="notifLib"/>
+    <aura:attribute name="stepName" type="String"/>
+    <aura:attribute name="isDisabled" type="Boolean" default="true" />
+    
+    <div class="slds-card">
+        <div class="slds-card__header slds-card__header-title slds-grid">
+            Onboarding Checklist
+        </div> 
+        <div class="slds-grid slds-card__body">
+            <div class="slds-col slds-size--5-of-6">
+                <lightning:picklistPath recordId="{!v.recordId}"
+                                        picklistFieldApiName="Onboarding_Checklist__c"
+                                        onselect="{!c.handleSelect}" 
+                                        />
+            </div>
+            <div class="slds-col slds-size--1-of-6 slds-p-around--small">
+                <lightning:button label="Mark as Current Stage" 
+                                  iconName="utility:check" 
+                                  iconPosition="left"  
+                                  variant="brand" 
+                                  onclick="{!c.updatePicklistValue}"
+                                  class="slds-truncate "
+                                  type="submit"
+                                  disabled="{!v.isDisabled}"
+                                  />
+            </div>
+        </div>
+    </div>
+    
+</aura:component>

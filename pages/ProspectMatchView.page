@@ -1,0 +1,22 @@
+<!--
+ - Created by abidap on 1/6/19.
+ -->
+
+<apex:page id="ProspectMatchView" standardController="Contact" extensions="ProspectMatchViewExtension">
+    <apex:includeLightning />
+    <div id="lightningComponent">
+    </div>
+
+    <script>
+        var recordIdVar = '{!contactRecordId}';
+        $Lightning.use("c:ProspectViewApp", function() {
+          $Lightning.createComponent("c:ProspectMatchMapView",
+          { recordId : recordIdVar },
+          "lightningComponent",
+          function(cmp) {
+            // do some stuff
+            console.log('Completed succesfully.');
+          });
+        });
+    </script> 
+</apex:page>

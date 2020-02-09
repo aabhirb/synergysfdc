@@ -1,0 +1,12 @@
+<!--
+ - Created by vkatragadda on 2/16/18.
+ -->
+
+<aura:event type="APPLICATION" description="GoogleAutoCompleteCmpEvent">
+    <aura:attribute name="address" type="String"/>
+    <aura:attribute name="lat" type="string"/>
+    <aura:attribute name="long" type="string"/>
+    <aura:attribute name="validstreet" type="Boolean"/>
+    <aura:attribute name="isCountyBlocked" type="Boolean" default="false" />
+    <aura:attribute name="addressType" type="String" />
+</aura:event>

@@ -1,0 +1,13 @@
+<!--
+ - Created by abidap on 1/20/19.
+ -->
+
+<aura:component description="LeadCreationComponent" implements="lightning:actionOverride,lightning:isUrlAddressable">
+    <aura:handler value="{!this}"  action="{!c.doInit}" name="init" />
+    <ltng:require styles="{!$Resource.popup}" />
+
+    <lightning:navigation aura:id="navService"/>
+
+    <lightning:overlayLibrary aura:id="overlayLib"/>
+
+</aura:component>

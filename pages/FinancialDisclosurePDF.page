@@ -1,0 +1,156 @@
+<apex:page controller="FinancialDisclosurePDFController" applyHtmlTag="false" 
+           applyBodyTag="false" showHeader="false" sidebar="false">
+    <html>
+        
+        <head>
+            <style>
+                @page {
+                
+                @bottom-left {
+                content: element(footer);
+                }
+                }
+                div.footer {
+                display: block;
+                padding: 5px;
+                position: running(footer);
+                }
+                .pagenumber:before {
+                content: counter(page);
+                }
+                
+                .pagecount:before {
+                content: counter(pages);
+                }
+                div.subfooter {
+                display: inline-block;
+                }
+                .right {
+                text-align: left;
+                
+                }
+            </style>
+        </head>
+        <body>
+            <apex:outputText rendered="{!isPrimaryContact == true}">
+                <center><div style="padding:2%;margin:5%;"><b>FINANCIAL DISCLOSURE for Synergy Specialists</b></div></center>
+                
+                <div style="padding-top:2%;margin-top:5%;">
+                    <b>Practice Owner:</b>  Dr.{!OpportunityDetails.GP_Contact__r.LastName}<br/>
+                    <b>Practice:</b> {!OpportunityDetails.GP_Contact__r.Account.Name}<br/>
+                    {!OpportunityDetails.GP_Contact__r.Formulated_MailingAddress__c}<br/>
+                    {!OpportunityDetails.GP_Contact__r.Account.Website}<br/>
+                    
+                    <b>Specialist:</b> Dr. {!OpportunityDetails.Primary_Contact__r.FirstName} {!OpportunityDetails.Primary_Contact__r.LastName}<br/>
+                    <br/>
+                    <br/>
+                    <b>The compensation structure to the relationship are as follows:</b><br/>
+                    <br/>
+                    The practice will pay the greater of {!OpportunityDetails.Compensation__c}% of adjusted production or ${!OpportunityDetails.Provider_Per_Diem__c}<br/>
+                    The practice will therefore retain approximately {!OpportunityDetails.Practice_Earning_Retention__c}%<br/>
+                    <br/>
+                    <table>
+                        <tr><td style=""><b>ACH Payments To:</b></td><td style="padding-left:20px;margin-left:20px">{!OpportunityDetails.Payable_To__c} </td></tr>
+                        <tr><td style=""></td><td style="padding-left:20px;margin-left:20px">Bank Account number: </td></tr>
+                        <tr><td style=""></td><td style="padding-left:20px;margin-left:20px">Routing number:</td></tr>
+                        <br/>
+                    </table>
+                    
+                    <table>
+                        <tr><td colspan="2"><b>Due:</b> {!OpportunityDetails.Primary_Contact__r.Net_Terms__c} days after treatment day is completed</td></tr>
+                        
+                        
+                        <tr><td style="padding-top:20px;margin-top:20px;"><b>Checks: </b></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>If writing a check, please list the Treatment Date in the memo</span></td> </tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Mail to: {!OpportunityDetails.Payment_Address__c} </span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Bounced Checks: Checks received without sufficient funds will incur a $50 service fee billed to the practice.</span></td></tr>
+                        
+                        <tr><td style="padding-top:20px;margin-top:20px;"><b>Cancellations:</b></td></tr>
+                        <tr><td style="text-align: center;">-</td><td>Scheduled treatment dates need to be cancelled at least 7 days prior. All cancellation requests must be in writing addressed to both Synergy Specialists and the Specialist. Ensure you get confirmation from the practice.</td> </tr>
+                        <tr><td style="text-align: center;">-</td><td>Cancellations without 7 days advance notice incur the specialists daily minimum of ${!OpportunityDetails.Provider_Per_Diem__c}</td></tr>
+                        <tr><td style="text-align: center;">-</td><td>Failure to pay in a timely fashion will result in an interruption of your specialty services and possible disconnection by the specialist. </td></tr>
+                        
+                        <tr><td colspan="2" style="padding-top:20px;margin-top:20px;"><b>Staffing and Supplies:</b></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Practice is responsible for having at least one dedicated chairside assistant and one back office sterilization assistant at the practice’s own expense.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>The cost of the trained and certified surgical sedation assistant “Surgical DA”, is split 50/50 with the practice.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>If applicable, the cost of each implant fixture is to be split 50/50.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Unless otherwise discussed, the Practice is responsible for purchasing “Surgical Sundries” including but not limited to  Rotary Files, Bone Graft, Membrane, Regenerative Products, Sutures, Local Anaesthetics, &amp; Disposables.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Any prosthetic components are the sole responsibility of the practice unless otherwise discussed.</span></td></tr>
+                        
+                        <tr><td style="padding-top:20px;margin-top:20px;"><b>Other: </b></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Adjusted production is defined as the total summation of posted charges, minus any adjustments made by the insurance company or courtesy discounts verbally approved by the Treating Provider. </span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Patient financing and/or merchant credit card processing fees are the financial responsibility of the practice. </span></td></tr>
+                        
+                    </table>
+                </div>
+                
+            </apex:outputText>
+            
+            <apex:outputText rendered="{!isPrimaryContact == false}">
+                <center><div style="padding:2%;margin:5%;"><b>FINANCIAL DISCLOSURE for SynergyPlus</b></div></center>
+                
+                <div style="padding-top:2%;margin-top:5%;">
+                    <b>Practice Owner:</b>  Dr.{!OpportunityDetails.GP_Contact__r.LastName}<br/>
+                    <b>Practice:</b> {!OpportunityDetails.GP_Contact__r.Account.Name}<br/>
+                    {!OpportunityDetails.GP_Contact__r.Formulated_MailingAddress__c}<br/>
+                    {!OpportunityDetails.GP_Contact__r.Account.Website}<br/>
+                    
+                    <b>Specialist:</b> Dr. {!OpportunityDetails.Primary_Contact__r.FirstName} {!OpportunityDetails.Primary_Contact__r.LastName}<br/>
+                    <br/>
+                    <br/>
+                    <b>The compensation structure to the relationship are as follows:</b><br/>
+                    <br/>
+                    The practice will pay the greater of {!OpportunityDetails.Compensation__c}% of adjusted production or ${!OpportunityDetails.Provider_Per_Diem__c}<br/>
+                    The practice will therefore retain approximately {!OpportunityDetails.Practice_Earning_Retention__c}%<br/>
+                    <br/>
+                    <table>
+                        <tr><td style=""><b>ACH Payments To:</b></td><td style="padding-left:20px;margin-left:20px">Shervin Molayem Dental Corporation </td></tr>
+                        <tr><td style=""></td><td style="padding-left:20px;margin-left:20px">Chase Bank Account number: 379102129 </td></tr>
+                        <tr><td style=""></td><td style="padding-left:20px;margin-left:20px">Routing number: 322271627</td></tr>
+                        <br/>
+                    </table>
+                    
+                    <table>
+                        
+                        <tr><td colspan="2"><b>Due:</b> {!OpportunityDetails.Primary_Contact__r.Net_Terms__c} days after treatment day is completed</td></tr>
+                        
+                        
+                        <tr><td style="padding-top:20px;margin-top:20px;"><b>Checks: </b></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>If writing a check, please list the Treatment Date in the memo</span></td> </tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Mail to: #115 - 363 530 New Los Angeles Ave., Moorpark, CA 93021</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Bounced Checks: Checks received without sufficient funds will incur a $50 service fee billed to the practice.</span></td></tr>
+                        
+                        <tr><td colspan="2" style="padding-top:20px;margin-top:20px;"><b>Cancellations by Practice:</b></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Scheduled treatment dates need to be cancelled at least 7 days prior. All cancellation requests must be in writing addressed to both Synergy Specialists and the Specialist. Ensure you get confirmation acknowledgement from the specialist.</span></td> </tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Cancellations without 7 days advance notice incur the specialists daily minimum of ${!OpportunityDetails.Provider_Per_Diem__c}</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Failure to pay in a timely fashion will result in an interruption of your specialty services and possible disconnection by the specialist. </span></td></tr>
+                        
+                        <tr><td colspan="2" style="padding-top:20px;margin-top:20px;"><b>Staffing and Supplies:</b></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Practice is responsible for having at least one dedicated chairside assistant and one back office sterilization assistant at the practice’s own expense.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>The cost of the trained and certified surgical sedation assistant “Surgical DA”, is split 50/50 with the practice.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>If applicable, the cost of each implant fixture is to be split 50/50.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Unless otherwise discussed, the Practice is responsible for purchasing “Surgical Sundries” including but not limited to  Rotary Files, Bone Graft, Membrane, Regenerative Products, Sutures, Local Anaesthetics, &amp; Disposables.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Any prosthetic components are the sole responsibility of the practice unless otherwise discussed.</span></td></tr>
+                        
+                        <tr><td style="padding-top:20px;margin-top:20px;"><b>Other: </b></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Patient financing and/or merchant credit card processing fees are the financial responsibility of the practice.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Adjusted production is the total summation of cash payments, co-payments, contracted insurance payments, &amp; out of network payments, minus any adjustments made by the insurance company or courtesy discounts verbally approved by the specialist. </span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>A copy of the EOB related to the insurance adjustment must be attached to the following production report.</span></td></tr>
+                        <tr><td style="text-align: center;">-</td><td><span>Specialist is expecting one check or payment for each production date, not multiple checks for one production date..</span></td></tr>
+                        
+                    </table>
+                </div>
+                
+            </apex:outputText>
+            
+            <div class="footer">
+                <div class="subfooter right">Page <span class="pagenumber"/> of <span class="pagecount"/></div>
+                <br/>
+                <div class="subfooter right"> Shervin Molayem Dental Corp Independent Contractor Agreement with Practice</div>
+                
+                
+            </div>
+        </body>
+        
+    </html>
+</apex:page>

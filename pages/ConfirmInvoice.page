@@ -1,0 +1,158 @@
+<!--
+ - Created by abidap on 4/27/19.
+ -->
+
+<apex:page id="ConfirmInvoice" sideBar="false" showHeader="false" controller="ConfirmInvoiceController">
+    <apex:slds />
+    <div class="slds-scope">
+        <div class="slds-grid">
+            <div class="slds-col slds-size--2-of-12">
+
+            </div>
+
+            <div class="slds-col slds-size--8-of-12">
+
+                <div style="margin-top: 1%;">
+                    <center>
+                        <span style="float:left">
+                            <img src="https://ascendorthodontics--devchavi--c.documentforce.com/servlet/servlet.ImageServer?id=0150x0000009xDp&oid=00D0x0000008yCO&lastMod=1551654388000" width="200" height="70"/>
+                        </span>
+                        <span style="color:darkseagreen;margin-left: -20%;" class="slds-text-heading_large">
+                             <b> Welcome to Synergy Specialists </b>
+                        </span>
+                    </center>
+                </div>
+                <br/>
+                <br/>
+                <apex:outputPanel >
+
+                    <div id="req-msg-div">
+
+                        <p>
+                        <span class="slds-text-heading_medium slds-text-color_weak">
+
+                            Hi Dr. {!opportunityLineItemRequested.Opportunity__r.Primary_Contact__r.Name}, please download, review, and approve your invoice from {!opportunityLineItemRequested.Treatment_Date_Formatted__c} using the links so we may submit to Dr. {!opportunityLineItemRequested.Opportunity__r.GP_Contact__r.Name} for payment.
+
+                        </span>
+
+                            <br/>
+                        <div class="slds-m-around--large">
+                            <div class="slds-card">
+                                <div class="slds-p-around--medium  slds-card--header">
+                                    <div class="slds-grid">
+                                        <div class="slds-col">
+                                            <div>
+                                                Treatment Date : {!opportunityLineItemRequested.Treatment_Date_Formatted__c}
+                                            </div>
+
+                                            <div>
+                                                Practice Name : {!opportunityLineItemRequested.Opportunity__r.GP_Contact__r.Name}
+                                            </div>
+
+                                        </div>
+
+                                        <div class="slds-col">
+                                            <div>
+                                                 Invoice Due Date : {!opportunityLineItemRequested.Invoice_Due_Date_Formatted__c}
+                                            </div>
+                                            <div>
+                                                Total Invoice Amount Due : {!opportunityLineItemRequested.Invoice_Amount__c}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="slds-m-around--large">
+                            <div class="slds-card">
+                                <div class="slds-p-around--medium  slds-card--header">
+                                    <center>
+                                         <button onclick="window.open('{!opportunityLineItemRequested.Invoice_PDF_URL__c}','open');" class="slds-button slds-button_outline-brand"> View Invoice </button>
+                                        
+                                        &nbsp; &nbsp; &nbsp; &nbsp;
+                                        <apex:outputPanel rendered="{!opportunityLineItemRequested.Production_Report_PDF_URL__c!= null}">
+                                            <button onclick="window.open('https://devint-internalsynergyspecialists.cs43.force.com/showFileContent?contentUrl='+'{!opportunityLineItemRequested.Production_Report_PDF_URL__c}','open');" class="slds-button slds-button_outline-brand"> View Production Report </button>                                        
+                                        </apex:outputPanel>
+                                    </center>
+                                </div>
+                            </div>
+                        </div>
+
+                        </p>
+                        <br/>
+                        <div class="slds-m-around--x-large" >
+                            <div class="slds-grid slds-m-around--x-large">
+                                <!-- <div class="slds-col">
+                                    <center>
+                                        <button onclick="onClickAction('approve');" class="slds-button slds-button_success"> Approve </button>
+                                    </center>
+                                </div>
+                                <div class="slds-col">
+                                    <center>
+                                        <button onclick="onClickAction('approve');" class="slds-button slds-button_success"> View Invoice </button>
+                                     </center>
+                                </div> -->
+                                
+                                <div class="slds-col">
+                                    <center>
+                                        <button onclick="onClickAction('approve');" class="slds-button slds-button_success"> Approve </button>
+                                     </center>
+                                </div>                                                               
+                                <!-- Production_Report_PDF_URL__c -->
+                            
+                            </div>
+                        </div>
+
+                    </div>
+
+                </apex:outputPanel>
+
+                <div id="resp-msg-div" style="display:none;">
+                    <span id="resp-msg-span" class="slds-text-heading_medium slds-text-color_weak">
+
+                    </span>
+                </div>
+                <div id="req-err-div">
+
+                </div>
+            </div>
+
+            <div class="slds-col slds-size--2-of-12">
+
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+
+            function onClickAction( actionTypeVar ) {
+                var lineItemIdVar = '{!opportunityLineItemId}';
+
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.ConfirmInvoiceController.onclickOfAction}',
+                    lineItemIdVar,
+                    function(result, event){
+                        if (event.status) {
+                            if( result ){
+                                var msg = '';
+                                msg = 'Thanks for Approval, We will be be sending over the invoice to Practice and request the practice to process payment by due date.'
+                                document.getElementById('resp-msg-div').style.display = 'block';
+                                document.getElementById('req-msg-div').style.display  = 'none';
+                                document.getElementById('req-err-div').style.display  = 'none';
+                                document.getElementById('resp-msg-span').innerHTML    = msg;
+
+
+                            }else{
+                                alert('Some error occured while processing , please contact synergy representative and we will get back to you shortly');
+                            }
+                        } else if (event.type === 'exception') {
+                            alert('Some error occured while processing , please contact synergy representative and we will get back to you shortly');
+                        } else {
+                            alert('Some error occured while processing , please contact synergy representative and we will get back to you shortly');
+                        }
+                    },
+                    {escape: true}
+                );
+            }
+    </script>
+</apex:page>

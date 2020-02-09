@@ -1,0 +1,14 @@
+<aura:component access="global">
+    <aura:attribute name="wrapperObject" type="Object" />
+    <aura:attribute name="recId" type="String" />
+    
+    Are you sure that you want to mark the Stage 
+    <lightning:formattedText value="{!v.wrapperObject.label}" class="slds-text-title_bold" />
+    as
+    <aura:if isTrue="{!v.wrapperObject.value}">
+        <lightning:formattedText value="Not Completed?" class="slds-text-title_bold" />
+        <aura:set attribute="else">
+            <lightning:formattedText value="Completed?" class="slds-text-title_bold" />
+        </aura:set>
+    </aura:if>
+</aura:component>

@@ -1,0 +1,100 @@
+<!--
+ - Created by abidap on 2/19/19.
+ -->
+
+<aura:component description="SendIntakeEmail" controller="CustomLeadConvertController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction,lightning:actionOverride,force:hasSObjectName"  >
+
+
+    <aura:attribute name="intakeOptionLst" type="Object" />
+    <aura:attribute name="selectedOptionLst" type="Object" />
+    <aura:attribute name="recordType" type="String" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <lightning:overlayLibrary aura:id="overlayLibModal"/>
+
+    <!-- LightningUtil component -->
+    <c:LightningUtil aura:id='LightningUtil-SendIntakeEmail' />
+    <!-- LightningUtil component -->
+
+    <div class="slds-page-header__name">
+        <div class="slds-page-header__name-title">
+            <h1>
+              <center>
+                 <span class="slds-page-header__title slds-hyphenate" title=""> <center> Select All Specialties , you want to send details of in the Email :  </center> </span>
+              </center>
+            </h1>
+        </div>
+    </div>
+
+
+
+    <div>
+        <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+
+            <aura:if isTrue="{!equals(v.recordType,'Practice')}">
+
+                <lightning:layoutItem  size="6" padding="around-small">
+
+                    <lightning:input type="toggle" messageToggleActive="" messageToggleInactive="" label="Recruitment Arrangement" name="gpRec" aura:id="gpRec" onchange="{!c.onChangeOfgpRec}"  />
+
+                </lightning:layoutItem>
+
+
+            </aura:if>
+
+            <!-- <aura:if isTrue="{!equals(v.recordType,'Provider')}"> -->
+                <lightning:layoutItem  size="6" padding="around-small">
+
+                    <lightning:input type="toggle" messageToggleActive="" messageToggleInactive="" label="Endodontics"  name="Endo" aura:id="Endo" onchange="{!c.onChangeOfEndo}"  />
+
+                </lightning:layoutItem>
+
+                <lightning:layoutItem  size="6" padding="around-small">
+
+                    <lightning:input type="toggle"  messageToggleActive="" messageToggleInactive="" label="Periodontics" name="Endo" aura:id="Perio" onchange="{!c.onChangeOfPerio}"  />
+
+                </lightning:layoutItem>
+
+                <lightning:layoutItem  size="6" padding="around-small">
+
+                    <lightning:input type="toggle"  messageToggleActive="" messageToggleInactive="" label="Orthodontics" name="Endo" aura:id="Endo" onchange="{!c.onChangeOfOrtho}"  />
+
+                </lightning:layoutItem>
+
+                <lightning:layoutItem  size="6" padding="around-small">
+
+                    <lightning:input type="toggle" messageToggleActive="" messageToggleInactive=""  label="Oral Surgergy" name="Oral" aura:id="Oral" onchange="{!c.onChangeOfOral}"  />
+
+                </lightning:layoutItem>
+
+                <lightning:layoutItem  size="6" padding="around-small">
+
+                    <lightning:input type="toggle"  messageToggleActive="" messageToggleInactive="" label="Pedodontics" name="Pedo" aura:id="Pedo" onchange="{!c.onChangeOfPedo}"  />
+
+                </lightning:layoutItem>
+
+                <lightning:layoutItem  size="6" padding="around-small">
+
+                    <lightning:input type="toggle"  messageToggleActive="" messageToggleInactive="" label="Dental Anesthesiology" name="Anesth" aura:id="Anesth" onchange="{!c.onChangeOfAnesth}"  />
+
+                </lightning:layoutItem>
+
+                <lightning:layoutItem  size="6" padding="around-small">
+
+                    <lightning:input type="toggle"  messageToggleActive="" messageToggleInactive="" label="Prosthodontics" name="Prostho" aura:id="Prostho" onchange="{!c.onChangeOfProstho}"  />
+
+                </lightning:layoutItem>
+
+                <lightning:layoutItem  size="6" padding="around-small">
+					<lightning:input type="toggle"  messageToggleActive="" messageToggleInactive="" label="Advance GP" name="advance" aura:id="advance" onchange="{!c.onChangeOfAdvanceGP}"  />
+                </lightning:layoutItem>
+            <!-- /aura:if> -->
+        </lightning:layout>
+    </div>
+
+    <div>
+        <center>
+            <lightning:button aura:id="submit"  label="Send Email" class="slds-m-top_small" onclick="{!c.onsubmit}" />
+        </center>
+    </div>
+</aura:component>

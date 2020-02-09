@@ -1,0 +1,123 @@
+<!--
+ - Created by abidap on 12/27/18.
+ -->
+
+<aura:component description="CustomLeadConvertComp" controller="CustomLeadConvertController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction">
+
+    <!-- Attributes -->
+    <aura:attribute type="Object" name="opportunityAttr" description="Opportunity after conversion" />
+    <aura:attribute type="Object" name="leadAttr" description="Lead after conversion" />
+    <aura:attribute type="Object" name="contactAttr" description="Lead after conversion" />
+    <aura:attribute type="Object" name="accountAttr" description="Account after conversion" />
+    <aura:attribute type="String" name="errorMessage" description="Lead conversion Error" default="" />
+    <!-- Attributes -->
+ 
+    <!-- Handlers -->
+    <aura:handler value="{!this}" name="init" action="{!c.doInit}" />
+    <!-- Handlers -->
+
+    <lightning:overlayLibrary aura:id="overlayLibModal"/>
+
+    <!-- LightningUtil component -->
+    <c:LightningUtil aura:id='LightningUtil-CustomLeadConvertComp' />
+    <!-- LightningUtil component -->
+
+    <!-- Load the Spinner on lick of Convert button -->
+    <div aura:id="loadingDiv">
+        <div class="slds-text-align--center slds-text-body_regular">
+            Lead Conversion in Process , Please wait...
+        </div>
+        <lightning:spinner size="medium" />
+    </div>
+    <!-- Load the Spinner on lick of Convert button -->
+
+    <!-- Detail Div for showing the conversion details -->
+    <div aura:id="detailDiv">
+
+        <aura:if isTrue="{!!equals(v.errorMessage,'')}">
+            <div id="errorDiv" style="display:none;" class="scroller">
+                <div aura:id="errorDiv"    class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert" >
+                    {!v.errorMessage}
+                </div>
+            </div>
+        </aura:if>
+
+        <aura:if isTrue="{!or(v.accountAttr!=null,v.contactAttr!=null)}">
+            <div class="slds-text-align--center slds-text-title_bold">
+                <lightning:dynamicIcon type="trend" option="down" alternativeText="Trending down"/> Your Lead has been converted
+            </div>
+            <br/>
+        </aura:if>
+        <lightning:layout multipleRows="true" horizontalAlign="center">
+            <aura:if isTrue="{!v.accountAttr!=null}">
+
+                <lightning:layoutItem size="6" padding="around-small">
+                    <div class="slds-text-title_caps">
+                       <center> Account </center>
+                    </div>
+                    <br/>
+                    <div onclick="{!c.onclickOfRecord}" data-attri="{!v.accountAttr.Id}" data-sobj="account" class="slds-box pointer slds-truncate">
+                        <lightning:layout horizontalAlign="center" verticalAlign="center">
+                            <lightning:layoutItem size="3">
+                                <lightning:icon size="medium" iconName="standard:account" />
+                            </lightning:layoutItem>
+
+                            <lightning:layoutItem size="9">
+                                <div class="slds-text-heading--medium slds-truncate">
+                                    {!v.accountAttr.Name}
+                                </div>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                    </div>
+                </lightning:layoutItem>
+
+            </aura:if>
+
+            <aura:if isTrue="{!v.contactAttr!=null}">
+            <lightning:layoutItem size="6" padding="around-small">
+                <div class="slds-text-title_caps">
+                    <center> Contact </center>
+                </div>
+                <br/>
+                <div onclick="{!c.onclickOfRecord}" data-attri="{!v.contactAttr.Id}" data-sobj="contact" class="slds-box pointer slds-truncate">
+                    <lightning:layout horizontalAlign="center" verticalAlign="center">
+                        <lightning:layoutItem size="3">
+                            <lightning:icon size="medium" iconName="standard:contact" />
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem size="9">
+                            <div class="slds-text-heading--medium  slds-truncate">
+                                {!v.contactAttr.Name}
+                            </div>
+                        </lightning:layoutItem>
+                    </lightning:layout>
+                </div>
+                <br/>
+                <div>
+                    <center> <span style="color:red"> * Use this contact for starting the match process. </span>  </center>
+                </div>
+            </lightning:layoutItem>
+            </aura:if>
+
+            <aura:if isTrue="{!v.opportunityAttr!=null}">
+            <lightning:layoutItem size="6" padding="around-small">
+                <div onclick="{!c.onclickOfRecord}" data-attri="{!v.opportunityAttr.Id}" data-sobj="opportunity" class="slds-box pointer slds-truncate">
+                    <lightning:layout horizontalAlign="center" verticalAlign="center">
+                        <lightning:layoutItem size="3">
+                            <lightning:icon size="medium" iconName="standard:opportunity" />
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem size="9">
+                            <div class="slds-text-heading--medium  ">
+                                {!v.opportunityAttr.Name}
+                            </div>
+                        </lightning:layoutItem>
+                    </lightning:layout>
+                </div>
+            </lightning:layoutItem>
+            </aura:if>
+        </lightning:layout>
+    </div>
+    <!-- Detail Div for showing the conversion details -->
+
+</aura:component>

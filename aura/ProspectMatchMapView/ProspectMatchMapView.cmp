@@ -1,0 +1,240 @@
+<!--
+ - Created by abidap on 1/3/19.
+ -->
+
+<aura:component description="ProspectMatchMapView" controller="ProspectMatchMapViewCtrlr" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction,lightning:actionOverride,force:hasSObjectName">
+    <aura:attribute name="mapMarkers" type="Object"/>
+    <aura:attribute name="wrapperLst" type="Object"/>
+    <aura:attribute name="markersTitle" type="String" />
+    <aura:attribute name="center" type="Object" />
+    <aura:attribute name="zoomLevel" type="Integer" default="5"/>
+
+    <aura:attribute name="data" type="Object"/>
+    <aura:attribute name="filteredData" type="Object"/>
+    <aura:attribute name="columns" type="List"/>
+    <aura:attribute type="Id" name="recordId" access="global"/>
+    <aura:attribute type="List" name="selectedMatchIdList" />
+    <aura:attribute type="Integer" name="realculateMilesInteger" />
+    <aura:attribute type="String" name="processTypeAttr" />
+    <aura:attribute type="String" name="operatorSelected" />
+    <aura:attribute type="String" name="filterByAttr"  />
+    <aura:attribute type="String" name="filterValue" />
+    <aura:attribute type="Boolean" name="isSPEligibleForMatch" default="false" />
+    <aura:attribute type="Boolean" name="isTextSelection" default="false" />
+    <aura:attribute type="String[]" name="operatorLst"  />
+    <aura:attribute type="String[]" name="RHSSelectionLst"  />
+    <aura:attribute type="Boolean" name="isPracticeFlow" default="false" />
+    <aura:attribute name="optionsTypeCheckbox" type="List" default="[
+                                                            {'label': 'Contact', 'value': 'Contact'},
+                                                            {'label': 'Lead', 'value': 'Lead'}
+                                                        ]"/>
+
+    <aura:attribute name="optionsSPStatusCheckbox" type="List" default="[
+                                                            {'label': 'Contract Signed', 'value': 'Contract Signed' },
+                                                            {'label': 'Contract Pending', 'value': 'Contract Pending' },
+                                                            {'label': 'Initial', 'value': 'Initial' }
+                                                        ]"/>
+
+    <aura:attribute name="optionsSpecialtyCheckbox" type="List" default="[
+                                                            {'label': 'Perio', 'value': 'Perio' },
+                                                            {'label': 'Oral', 'value': 'Oral' },
+                                                            {'label': 'Endo', 'value': 'Endo' },
+                                                            {'label': 'Ortho', 'value': 'Ortho' },
+                                                            {'label': 'Prostho', 'value': 'Prostho' }
+                                                        ]"/>
+
+    <aura:attribute name="optionsStageCheckbox" type="List" default="[
+                                                            {'label': 'No Action Yet', 'value': 'No Action Yet' },
+                                                            {'label': 'Match Email Sent to SP', 'value': 'Match Email Sent to SP' },
+                                                            {'label': 'Match Email Sent to GP', 'value': 'Match Email Sent to GP' },
+                                                            {'label': 'Match Approved', 'value': 'Match Approved' }
+                                                        ]"/>
+
+    <aura:attribute name="filterColumns" type="List" default="[
+                                                            {'label': 'Name', 'value': 'Name' },
+                                                            {'label': 'Approximate Distance', 'value': 'Approximate Distance' }
+                                                        ]"/>
+
+
+
+    <aura:attribute type="String" name="typeCheckBoxValue" default="Contact;Lead" />
+    <aura:attribute type="String" name="statusCheckBoxValue" default="Contract Signed;Contract Pending;Initial" />
+    <aura:attribute type="String" name="specialtyCheckBoxValue" default="Perio;Oral;Endo;Ortho;Prostho" />
+    <aura:attribute type="String" name="stageCheckBoxValue" default="No Action Yet;Match Email Sent to SP;Match Email Sent to GP;Match Approved" />
+
+    <!-- Handlers -->
+    <aura:handler value="{!this}" name="init" action="{!c.doInit}" />
+    <!-- Handlers -->
+
+    <!-- LightningUtil component -->
+    <c:LightningUtil aura:id='LightningUtil-ProspectMatchMapView' />
+    <!-- LightningUtil component -->
+
+
+    <div class="slds-card">
+        <div >
+            <div class="slds-card__header">
+                <div class="slds-grid">
+                    <div class="slds-col slds-size--1-of-3">
+                        <span class="slds-card__header-title ">
+                            <lightning:icon size="small" iconName="standard:team_member" /> &nbsp; Possible Matches
+                        </span>
+                    </div>
+                    <div class="slds-col slds-size--2-of-3">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                                <lightning:input style="margin-top: -5%;" type="number" min="0" label="" value="{!v.realculateMilesInteger}" placeholder="Re-Calculation Radius"/>
+                            </div>
+                            <div class="slds-col" >
+                                <lightning:button class="slds-m-left--small" label="Re-Calculate" title="Re-Calculate" onclick="{! c.handleRecalculateAction }"/>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+            <div>
+
+                <div class="slds-grid" style="border: 1px solid #ece7e7;">
+                    <div class="slds-col slds-m-around--small">
+                        <lightning:select label="Filter By"  value="{!v.filterByAttr}" name="filterBy"  onchange="{!c.onChangeOfPicklist}" >
+                            <option text="-- Select --" value=""  />
+                            <aura:iteration items="{!v.filterColumns}" var="option">
+                                <aura:if isTrue="{!and(notequals(v.option.label,'Practice Address'),notequals(v.option.label,'Provider Address'))}">
+                                    <option text="{!option.label}" value="{!option.label}" />
+                                </aura:if>
+                            </aura:iteration>
+                        </lightning:select>
+                    </div>
+
+                    <div class="slds-col slds-m-around--small">
+
+                        <lightning:select label="Filter By"  value="{!v.operatorSelected}" name="filterBy"  >
+                            <option text="-- Select --" value=""  />
+                            <aura:iteration items="{!v.operatorLst}" var="option" indexVar="ind" >
+                                <option text="{!option}" value="{!option}"  />
+                            </aura:iteration>
+                        </lightning:select>
+                    </div>
+
+                    <div class="slds-col slds-m-around--small ">
+                        <!-- <div class="slds-m-top-medium" > -->
+                        <aura:if isTrue="{!v.isTextSelection}">
+                            <lightning:input type="text" value="{!v.filterValue}" label="Filter Value" />
+
+                            <aura:set attribute="else">
+                                <lightning:select label="Filter Value"  value="{!v.filterValue}" name="filterBy"  >
+                                    <option text="-- Select --" value=""  />
+                                    <aura:iteration items="{!v.RHSSelectionLst}" var="option">
+                                        <option text="{!option}" value="{!option}"   />
+                                    </aura:iteration>
+                                </lightning:select>
+                            </aura:set>
+
+                        </aura:if>
+
+                        <!--  </div> -->
+
+                    </div>
+
+                    <div class="slds-col slds-m-around--x-small">
+                        <div class="slds-m-top--large">
+                            <lightning:button label="Apply" onclick="{!c.onClickOfApply}" />
+                        </div>
+
+                    </div>
+
+                    <div class="slds-col slds-m-around--x-small">
+                        <div class="slds-m-top--large">
+                            <lightning:button label="Clear" onclick="{!c.onClickOfClear}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-grid" style="border: 1px solid #ece7e7;">
+
+                    <div class="slds-col slds-m-around--small">
+                        <lightning:checkboxGroup name="type-checkbox"
+                                                 label="Type"
+                                                 options="{! v.optionsTypeCheckbox }"
+                                                 value="{! v.typeCheckBoxValue }"
+                                                 onchange="{! c.handleChange }"/>
+
+                    </div>
+
+                    <div class="slds-col slds-m-around--small">
+                        <!-- Aura if .. show it only for Providers -->
+                        <aura:if isTrue="{!v.isPracticeFlow}">
+                            <lightning:checkboxGroup name="sp-status-checkbox"
+                                                     label="Provider Status"
+                                                     options="{! v.optionsSPStatusCheckbox }"
+                                                     value="{! v.statusCheckBoxValue }"
+                                                     onchange="{! c.handleChange }"/>
+
+                        </aura:if>
+
+                        <!-- Aura if .. show it only for Providers -->
+                    </div>
+
+                    <div class="slds-col slds-m-around--small">
+
+                            <lightning:checkboxGroup name="specialty-checkbox"
+                                                     label="Specialty"
+                                                     options="{! v.optionsSpecialtyCheckbox }"
+                                                     value="{! v.specialtyCheckBoxValue }"
+                                                     onchange="{! c.handleChange }"/>
+
+
+                    </div>
+
+                    <div class="slds-col slds-m-around--small">
+
+                        <lightning:checkboxGroup name="match-stage-checkbox"
+                                                 label="Stage"
+                                                 options="{! v.optionsStageCheckbox }"
+                                                 value="{! v.stageCheckBoxValue }"
+                                                 onchange="{! c.handleChange }"/>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <aura:if isTrue="{!v.data.length != 0}">
+                <div class="slds-card__body">
+
+                    <lightning:datatable
+                            columns="{! v.columns }"
+                            data="{! v.filteredData }"
+                            keyField="id"
+                            onrowaction="{! c.handleRowAction }"
+                            hideCheckboxColumn="true"
+                            onrowselection="{! c.handleRowSelection }"  />
+
+                </div>
+            </aura:if>
+
+            <aura:if isTrue="{!or(v.data==null , v.data.length == 0)}">
+                <div class="slds-text-title_bold slds-align--absolute-center">
+                    No Matches found near this Contact.
+                </div>
+            </aura:if>
+
+            <aura:if isTrue="{!or(v.filteredData==null , v.filteredData.length == 0)}">
+                <div class="slds-text-title_bold slds-align--absolute-center">
+                    No Matches found for this filter, Please change the filter to see more results.
+                </div>
+            </aura:if>
+        </div>
+    </div>
+
+</aura:component>

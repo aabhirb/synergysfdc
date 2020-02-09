@@ -1,0 +1,8 @@
+<aura:component access="global" controller="ProviderChecklistController">
+    <lightning:overlayLibrary aura:id="overlayLib"/>
+    <aura:attribute name="wrapperObject" type="Object" />
+    <aura:attribute name="recId" type="String" />
+    
+    <lightning:button name="cancel" label="Cancel" onclick="{!c.handleCancel}"/>
+    <lightning:button name="ok" label="Confirm" variant="brand" type="submit" onclick="{!c.handleConfirm}"/>
+</aura:component>

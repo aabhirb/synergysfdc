@@ -1,0 +1,104 @@
+<apex:page standardController="Lead" recordSetVar="leads" tabStyle="lead" extensions="emailSendExtension" >
+
+    <apex:form >
+    <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="x-ua-compatible" content="ie=edge" />
+      <title>Lead</title>
+      <meta name="viewport" cxxontent="width=device-width, initial-scale=1" />
+      <!-- Import the Design System style sheet -->
+      <apex:slds />
+    </head>
+    <div class="slds-scope">
+        
+        <apex:pageBlock >
+            <apex:pageMessages />
+
+            <div class="slds-grid">
+                <div class="slds-col">
+                    <div class="slds-card">
+
+                        <div class="slds-card__header">
+                            Provider Follow-Ups
+                        </div>
+
+                        <div class="slds-card__body slds-align--absolute-center" >
+                            <div class="slds-m-bottom--small">
+                                <apex:commandButton action="{!providerAboutUsWOIntake}" value="Provider About Us W/O Link"  styleClass="slds-button slds-button_neutral wk_btn"/>
+
+                                <apex:commandButton action="{!providerRTM}" value="Provider Lead Intake - RTM"  styleClass="slds-button slds-button_neutral wk_btn"/>
+
+                                <apex:commandButton action="{!providerAvail}" value="Provider Lead Intake - Availability" styleClass="slds-button slds-button_neutral wk_btn"/>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-col">
+                    <div class="slds-card">
+
+                        <div class="slds-card__header">
+                            Practice Follow-Ups
+                        </div>
+
+                        <div class="slds-card__body  slds-align--absolute-center" >
+                            <div class="slds-m-bottom--small">
+                                <apex:commandButton action="{!practiceAboutUsWOIntake}" value="Practice About Us W/O Link"  styleClass="slds-button slds-button_neutral wk_btn"/>
+
+                                <apex:commandButton action="{!practiceRTM}" value="Practice Lead Intake - RTM"  styleClass="slds-button slds-button_neutral wk_btn"/>
+
+                                <apex:commandButton action="{!practiceAvail}" value="Practice Lead Intake - Availability"  styleClass="slds-button slds-button_neutral wk_btn"/>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="slds-float--right">
+                <div class="slds-m-around--small">
+                <apex:commandButton action="{!doAction}"  value="Back To Lead List View" styleClass="slds-button slds-button_neutral wk_btn"/>
+                </div>
+            </div>
+            <div>
+                <apex:outputPanel id="textAreaDiv">
+                    <apex:inputtextarea label="RichText"  richtext="true" value="{!templateBody}" readOnly="true"
+                                        id="Body" cols="100" rows="15"/>
+                </apex:outputPanel>
+            </div>
+
+            <div>
+                <apex:commandButton action="{!sendEmailAction}" value="Send Emails"  styleClass="slds-button slds-button_neutral wk_btn" oncomplete="onCompletionOfSendEmail();" />
+            </div>
+            <apex:pageBlockTable value="{!selectedList}" var="ld">
+                <apex:column >
+                    <apex:facet name="header">Send Email?</apex:facet>
+                    <apex:inputCheckbox value="{!ld.isSelected}" />
+                </apex:column>
+                <apex:column value="{!ld.nameStr}">
+                    <apex:facet name="header">Name</apex:facet>
+                </apex:column>
+                <apex:column value="{!ld.emailStr}">
+                    <apex:facet name="header"> Email</apex:facet>
+                </apex:column>
+                <apex:column value="{!ld.optedOutOfEmail}">
+                    <apex:facet name="header"> Opted Out ?</apex:facet>
+                </apex:column>
+            </apex:pageBlockTable>      
+        </apex:pageBlock>
+        
+        </div>
+    
+    </apex:form>
+    <script>
+        function onCompletionOfSendEmail(){
+            
+            alert('Follow Up Emails sent successfully, Check leads for further activity. ');
+            window.location.href = 'https://ascendorthodontics.lightning.force.com/lightning/o/Lead/list?filterName=Recent';
+        }
+    </script>
+</apex:page>

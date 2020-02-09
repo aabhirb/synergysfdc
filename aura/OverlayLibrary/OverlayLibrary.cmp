@@ -1,0 +1,5 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,lightning:actionOverride,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+    
+    <lightning:overlayLibrary aura:id="overlayLib"/>
+    <aura:handler name='init' action="{!c.init}" value="{!this}" />
+</aura:component>

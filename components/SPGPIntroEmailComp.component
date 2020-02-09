@@ -1,0 +1,84 @@
+<!--
+   - Created by abidap on 2/21/19.
+   -->
+<apex:component id="SPGPIntroEmailComp" controller="ShowProspectMatchesCtrlr" access="global">
+   <apex:attribute name="matchIdAttr" type="String" assignTo="{!matchIdSPGP}"  access="GLOBAL" description="This is the match id for which email is sent"/>
+   <style>
+      @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400');
+      .emailContent{
+      font-family:'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
+      }
+   </style>
+   <div class="emailContent" >
+      Dear Dr. {!matchToInitiate.GP_Contact__r.LastName},
+      <p>We’re excited to introduce you to {!matchToInitiate.Specialist_Specialty__c}, Dr. {!matchToInitiate.SP_Contact__r.Name}. Please reply-all to this email with several time slots available to meet at your practice. </p>
+      <p>
+         To prepare for the meeting, please review the Meeting Framework and the specialist’s Terms of Service (both attached). These documents are essential to calibrating expectations and to the success of your professional relationship.
+      </p>
+      <b>Dr. {!matchToInitiate.SP_Contact__r.Name}, {!matchToInitiate.Specialist_Specialty__c}</b><br/>
+      <apex:outputPanel rendered="{!matchToInitiate.SP_Contact__r.MobilePhone!= null}">
+         Mobile: {!matchToInitiate.SP_Contact__r.MobilePhone}<br/>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!matchToInitiate.SP_Contact__r.Preferred_Contact_Time__c!= null}">
+         Preferred contact time: {!matchToInitiate.SP_Contact__r.Preferred_Contact_Time__c}<br/>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!matchToInitiate.SP_Contact__r.Preferred_Contact_Method__c!= null}">
+         Preferred contact method: {!matchToInitiate.SP_Contact__r.Preferred_Contact_Method__c}<br/>
+      </apex:outputPanel>
+      <br/>
+      <b>{!matchToInitiate.GP_Contact__r.Account.Name}</b> <br/>
+      Practice Owner: Dr. {!matchToInitiate.GP_Contact__r.Name} <br/>
+      Address: {!matchToInitiate.GP_Contact__r.Formulated_MailingAddress__c}<br/>
+      <apex:outputPanel rendered="{!matchToInitiate.GP_Contact__r.Phone != null}">
+         Practice Phone: {!matchToInitiate.GP_Contact__r.Phone}<br/>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!matchToInitiate.GP_Contact__r.MobilePhone != null}">
+         Mobile: {!matchToInitiate.GP_Contact__r.MobilePhone}<br/>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!matchToInitiate.GP_Contact__r.OM_Name__c != null}">
+         Office Manager: {!matchToInitiate.GP_Contact__r.OM_Name__c}<br/>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!matchToInitiate.GP_Contact__r.OM_Phone__c != null}">
+         Office Manager Direct Line: {!matchToInitiate.GP_Contact__r.OM_Phone__c}<br/>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!matchToInitiate.GP_Contact__r.Account.Website != null}">
+         Practice website address: {!matchToInitiate.GP_Contact__r.Account.Website}<br/>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!matchToInitiate.GP_Contact__r.Preferred_Contact_Time__c != null}">
+         Preferred contact time: {!matchToInitiate.GP_Contact__r.Preferred_Contact_Time__c}<br/>
+      </apex:outputPanel>
+      <apex:outputPanel rendered="{!matchToInitiate.GP_Contact__r.Preferred_Contact_Method__c != null}">
+         Preferred contact method: {!matchToInitiate.GP_Contact__r.Preferred_Contact_Method__c} <br/>
+      </apex:outputPanel>
+      <br/>
+      <p> Don't hesitate to reach out with questions in the meantime. We’ll follow up after your meeting with next steps: preparation, training, and credentialing.  </p>
+   </div>
+   <table style="width:100%;" cellpadding="0" cellspacing="0">
+      <tbody>
+         <tr>
+            <td style="width:25%; padding-right:10px; padding-bottom: 10px; vertical-align:top; text-align:left;" valign="top" rowspan="1" align="left">
+               <img style="width:100%; height:auto; margin-bottom: 20px; border:0;" border="0" alt="Synergy Specialists Logo"  src="https://ascendorthodontics--devchavi--c.documentforce.com/servlet/servlet.ImageServer?id=0150x0000009xDp&oid=00D0x0000008yCO&lastMod=1551654388000"/>
+               <p style="font-family: Helvetica, sans-serif; font-size: 15px; line-height: 20px; color: #515151; letter-spacing: 1px; text-transform:uppercase; margin-left: 50px; margin-bottom: 1px;"><strong>DARIUS SOMEKHIAN</strong></p>
+               <p style="font-family: Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.2px; color: #515151; font-weight: 100; margin-left:50px; margin-top:1px;">Chief Executive Officer</p>
+               <p style="margin-left: 50px;"><span><a href="https://www.facebook.com/SynergySpecialists/" target="_blank"> <img border="0" width="27" alt="Facebook icon" style="border:0; height:27px; width:27px" src="https://ascendorthodontics--devchavi--c.visualforce.com/resource/1554855393000/fb_image" /></a> </span>
+                  <span><a href="https://www.linkedin.com/company/synergy-specialists-co/" target="_blank"><img border="0" width="27" alt="Linkedin icon" style="border:0; height:27px; width:27px" src="https://ascendorthodontics--c.visualforce.com/resource/1554870286000/linkedin_image?" /></a> </span>
+                  <span><a href="https://www.instagram.com/synergyspecialists/" target="_blank"><img border="0" width="27" alt="Instagram icon" style="border:0; height:27px; width:27px" src="https://ascendorthodontics--devchavi--c.visualforce.com/resource/1554855393000/insta_image" /></a> </span>
+               </p>
+            </td>
+            <td style="width:75%; padding-bottom:10px; padding-left:10px;" valign="top">
+               <hr style="border-top: 3px solid #90b5a3; margin-top: 50px; margin-bottom: 42px;"/>
+               <p style="font-family: Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.2px; color: #515151; font-weight: 100; margin-bottom:5px;"><span style="padding-right: 14px; color:#90b5a3;"><strong>T:</strong></span><a style="text-decoration:none; color:#515151;" href="tel:3104002531">(310) 400-2531</a></p>
+               <p style="font-family: Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.2px; color: #515151; font-weight: 100; margin-top: 5px; margin-bottom:5px;"><span style="padding-right: 13px; color:#90b5a3;"><strong>E:</strong></span><a style="text-decoration:none; color:#515151;" href="mailto:Darius@SynergySpecialists.com">Darius@SynergySpecialists.com</a></p>
+               <p style="font-family: Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.2px; color: #515151; font-weight: 100; margin-top:5px;"><span style="padding-right: 10px; color:#90b5a3;"><strong>W:</strong></span><a style="text-decoration:none; color:#515151;" target="_blank" href="https://synergyspecialists.com">SynergySpecialists.com</a></p>
+            </td>
+         </tr>
+         <tr>
+            <td style="font-size:11px; line-height:15px; font-weight:100; word-spacing: -1px; letter-spacing: 0.2px; border-top:#e5e5e5 2px solid; font-family: Helvetica, sans-serif; padding-top:10px; color:#8c8c8c; text-align:justify; vertical-align:top;" align="justify" valign="top" colspan="2" margin-top="15px">
+               <p style="padding-right: 10px; padding-left: 10px;"><strong>CONFIDENTIALITY NOTICE:</strong> This e-mail transmission (including attachments) may contain confidential or legally privileged information that is intended only for the individual or entity named in the email address. If you are not the intended recipient, you are hereby notified that any disclosure, copying, distribution or reliance upon the contents of this e-mail is strictly prohibited. If you have received this e-mail transmission in error, please notify the sender of the delivery error by replying to this message, then delete it from your system, and destroy all copies. Thank you!</p>
+            </td>
+         </tr>
+      </tbody>
+   </table>
+   <br/>
+   Your Synergy Team.<br/>
+</apex:component>

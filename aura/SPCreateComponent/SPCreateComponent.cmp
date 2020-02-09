@@ -1,0 +1,545 @@
+<!--
+ - Created by abidap on 1/20/19.
+ -->
+
+<aura:component description="SPCreateComponent" controller="CustomLeadConvertController">
+
+    <aura:attribute type="Lead" name="containerLead" default="{'sobjectType':'Lead'}" />
+    <aura:attribute type="String" name="recordTypeIdAttr"  access="global" default="" />
+    <aura:attribute type="String" name="activeSection" default="general-information" />
+    <aura:attribute type="String" name="searchKeyAttr" />
+    <aura:attribute type="String" name="searchKeyEntityAttr" />
+    <aura:attribute type="String" name="searchKeyPracticeAttr" />
+    <aura:attribute type="String" name="searchKeyNonCompeteAttr" />
+    <aura:attribute type="String" name="selectedHomeAddress" default="" />
+    <aura:attribute type="Boolean" name="showOtherleadSource" default="false" />
+    <aura:attribute type="Boolean" name="showDualSpecialtySelectList" default="false" />
+    <aura:attribute type="Boolean" name="showOtherlanguage" default="false" />
+    <aura:attribute type="Boolean" name="showEntitySelection" default="false" />
+    <aura:attribute type="Boolean" name="showPracticeSelection" default="false" />
+    <aura:attribute type="Boolean" name="showNonCompeteSelection" default="false" />
+    <aura:attribute type="Boolean" name="showResidentSelection" default="false" />
+    <aura:attribute type="Boolean" name="showSuspensionSelection" default="false" />
+    <aura:attribute type="Boolean" name="travelingEquipmentSelection" default="false" />
+    <aura:attribute type="Boolean" name="assistanceSelection" default="false" />
+    <aura:attribute type="Boolean" name="isGroupAffiliated" default="false" />
+    <aura:attribute type="Object[]"  name="addressListCaptured" />
+    <aura:attribute type="Object"  name="homeAddressCaptured" />
+    <aura:attribute type="String" name="errorMessage"  access="global" default="" />
+    <aura:attribute type="Boolean" name="isButtonClicked" default="false" />
+    <aura:attribute type="Boolean" name="showGPType" default="false" />
+    <aura:attribute type="Boolean" name="isSynergyCE" default="false" />
+    <aura:attribute type="Boolean" name="isSynergyFormulary" default="false" />
+
+
+    <aura:handler event="c:GoogleAutoCompleteCmpEvent"  action="{!c.handleComponentEvent}"/>
+
+    <lightning:overlayLibrary aura:id="overlayLibModal"/>
+    <!-- <ltng:require styles="{!$Resource.popup}" /> -->
+    <!-- LightningUtil component -->
+    <c:LightningUtil aura:id='LightningUtil-SPCreateComponent' />
+    <!-- LightningUtil component -->
+
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}" />
+
+    <!-- Error -->
+    <div id="errorDiv" style="display:none;" class="scroller">
+        <div aura:id="errorDiv"    class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert" >
+            {!v.errorMessage}
+        </div>
+    </div>
+
+    <!-- Error -->
+
+    <lightning:recordEditForm aura:id="recordViewForm" recordTypeId="{!v.recordTypeIdAttr}" objectApiName="Lead"
+                              onerror="{!c.handleError}" onsuccess="{!c.handleSuccess}"  >
+
+        <lightning:messages />
+
+        <lightning:accordion activeSectionName="{!v.activeSection}">
+
+            <lightning:accordionSection label="General Information" name="general-information">
+
+                <!-- <aura:set attribute="actions">
+                    <lightning:buttonMenu aura:id="menu" alternativeText="Show menu">
+                        <lightning:menuItem value="New" label="Menu Item One" />
+                    </lightning:buttonMenu>
+                </aura:set>-->
+
+                <!-- Body-->
+
+
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <span style="float:left;color:red;">*</span><lightning:inputField aura:id="firstName" fieldName="FirstName" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField aura:id="lastName" fieldName="LastName" />
+                    </lightning:layoutItem>
+
+
+
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <span style="float:left;color:red;">*</span><lightning:inputField aura:id="email" fieldName="Email" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField aura:id="mobilePhone" fieldName="MobilePhone" />
+                    </lightning:layoutItem>
+
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="LeadSource" aura:id="leadSource" onchange="{!c.onChangeOfLeadSource}" />
+                    </lightning:layoutItem>
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <aura:if isTrue="{!v.showOtherleadSource}">
+                            <lightning:inputField fieldName="Other_Lead_Source__c"  />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField aura:id="specialtyPrimary" fieldName="SPSPECIALTY__c" onchange="{!c.onSpecialistSelection}" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Status" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <aura:if isTrue="{!v.showGPType}">
+                            <lightning:inputField aura:id="specialtyPrimary" fieldName="Advanced_GP_Type__c" />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Have_Dual_Specialty__c" onchange="{!c.onChangeOfDualSpecialty}" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField aura:id="company" fieldName="Company" />
+                       <span style="color:red">  * Enter First Name and Last Name Or Entity Name. </span>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <aura:if isTrue="{!v.showDualSpecialtySelectList}" >
+                            <lightning:inputField fieldName="SPSPECIALTY2__c"  />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Procedures_SP_Uncomfortable_with__c"  />
+                    </lightning:layoutItem>
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Days_SP_Available_per_month__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Date_Of_Birth__c" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem size="12" padding="around-small" >
+                        <center>
+                            <lightning:button name="nextAction" variant="brand" label="Next" onclick="{!c.onNextAction}" />
+                        </center>
+                    </lightning:layoutItem>
+                </lightning:layout>
+
+                <!--Body-->
+
+            </lightning:accordionSection>
+
+            <lightning:accordionSection label="Contact Information" name="personal-information">
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Preferred_Contact_Method__c"  />
+                    </lightning:layoutItem>
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Language_Spoken__c" onchange="{!c.onChangeOfLanguageSpoken}" />
+                    </lightning:layoutItem>
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <aura:if isTrue="{!v.showOtherlanguage}" >
+                            <lightning:inputField fieldName="Other_Language__c"  />
+                        </aura:if>
+                    </lightning:layoutItem>
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <c:GoogleAutoCompleteCmp searchlabel="Home Address" searchKey="{!v.searchKeyAttr}" />
+                    </lightning:layoutItem>
+
+                    <aura:if isTrue="false">
+
+                        <lightning:inputField aura:id="street" fieldName="Street"  />
+                        <lightning:inputField aura:id="city" fieldName="City"  />
+                        <lightning:inputField aura:id="zip" fieldName="PostalCode"  />
+                        <lightning:inputField aura:id="state" fieldName="State"  />
+
+                        <lightning:inputField aura:id="entity-city" fieldName="SP_Entity_City__c"  />
+                        <lightning:inputField aura:id="entity-street" fieldName="SP_Entity_Street__c"  />
+                        <lightning:inputField aura:id="entity-zip" fieldName="SP_Entity_Zip__c"  />
+                        <lightning:inputField aura:id="entity-state" fieldName="SP_Entity_State__c"  />
+
+                        <lightning:inputField aura:id="practice-address" fieldName="SP_Practise_Address__c"  />
+
+                    </aura:if>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField aura:id="distanceToTravel" fieldName="Distance_Ready_To_Travel__c"  />
+                    </lightning:layoutItem>
+
+                    <!--<aura:if isTrue="{!v.selectedHomeAddress != ''}">
+                        <div class="slds-truncate">
+                            <lightning:layoutItem  size="6" padding="horizontal-small">
+                                    Selected Home Address :  {!v.selectedHomeAddress}
+                            </lightning:layoutItem>
+                        </div>
+                    </aura:if>-->
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Add_state_s_licensed__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="State_License_Number__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="State_License_Expiry_Date__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                    </lightning:layoutItem>
+
+
+                    <lightning:layoutItem size="12" padding="around-small" >
+                        <center>
+                            <lightning:button name="nextAction"  variant="brand" label="Next" onclick="{!c.onNextActionOfPersonalSection}" />
+                        </center>
+                    </lightning:layoutItem>
+
+                </lightning:layout>
+            </lightning:accordionSection>
+
+            <lightning:accordionSection label="Professional Information" name="entity-information">
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="Entity__c" onchange="{!c.onChangeOfEntitySelection}"  />
+                    </lightning:layoutItem>
+                    <aura:if isTrue="{!v.showEntitySelection}">
+                        <lightning:layoutItem  size="6" padding="horizontal-small">
+                            <!-- <lightning:inputField fieldName="Entity_Legal_Name__c"  /> -->
+                            <lightning:inputField fieldName="Tax_ID_Number__c"  />
+                        </lightning:layoutItem>
+
+
+
+                        <lightning:layoutItem  size="6" padding="horizontal-small">
+                            <c:GoogleAutoCompleteCmp searchlabel="Entity Address" searchKey="{!v.searchKeyEntityAttr}" />
+                        </lightning:layoutItem>
+
+                        <!-- <lightning:layoutItem  size="12" padding="horizontal-small">
+
+                        </lightning:layoutItem>-->
+
+                    </aura:if>
+
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="Practise__c" onchange="{!c.onChangeOfPracticeSelection}"  />
+                    </lightning:layoutItem>
+
+                    <aura:if isTrue="{!v.showPracticeSelection}">
+                        <lightning:layoutItem  size="6" padding="horizontal-small">
+                            <lightning:inputField fieldName="Practise_Name__c"  />
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem  size="6" padding="horizontal-small">
+                            <c:GoogleAutoCompleteCmp searchlabel="Practice Address" searchKey="{!v.searchKeyPracticeAttr}" />
+                        </lightning:layoutItem>
+
+
+                    </aura:if>
+
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="SP_Non_Compete__c" onchange="{!c.onChangeOfNonCompeteSelection}"  />
+                    </lightning:layoutItem>
+
+                    <aura:if isTrue="{!v.showNonCompeteSelection}">
+
+                        <lightning:layoutItem  size="6" padding="horizontal-small">
+                            <!-- <lightning:inputField fieldName="Non_Compete_Zip__c"  /> -->
+                            <c:GoogleAutoCompleteCmp searchlabel="Non Compete Address" searchKey="{!v.searchKeyNonCompeteAttr}" />
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem  size="6" padding="horizontal-small">
+                            <lightning:inputField fieldName="Non_Compete_Distance__c"  />
+                        </lightning:layoutItem>
+
+                    </aura:if>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Dental_School_Name__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Dental_Grad_Date__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Specialty_School_Name__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Specialty_School_Date__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="Resident__c" onchange="{!c.onChangeOfResidentSelection}"  />
+                    </lightning:layoutItem>
+
+
+
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <aura:if isTrue="{!v.showResidentSelection}">
+                            <lightning:inputField fieldName="SP_MoonLighting__c" />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Prior_Suspension__c" onchange="{!c.onChangeOfSuspensionSelection}"  />
+                    </lightning:layoutItem>
+
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <aura:if isTrue="{!v.showSuspensionSelection}">
+                            <lightning:inputField fieldName="Suspension_Reason__c" />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+
+
+                    <lightning:layoutItem size="12" padding="around-small" >
+                        <center>
+                            <lightning:button name="nextAction"  variant="brand" label="Next" onclick="{!c.onNextActionOfProfessionalSection}" />
+                        </center>
+                    </lightning:layoutItem>
+
+                </lightning:layout>
+
+            </lightning:accordionSection>
+
+            <lightning:accordionSection label="Oral Surgery Information" name="surgery-information">
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+
+
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="SP_IMPLANT_SYSTEM__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="SP_IV_Comforts__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="SP_IV_Experience__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="Procedures_SP_Uncomfortable_with__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Have_Assistance__c" onchange="{!c.onChangeOfAssistance}" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <aura:if isTrue="{!v.assistanceSelection}">
+                            <lightning:inputField fieldName="Assistant_Hourly_Rate__c"  />
+                        </aura:if>
+
+                        <aura:if isTrue="{!!v.assistanceSelection}">
+                            <lightning:inputField fieldName="Need_Help_with_Assistant__c"  />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Clear_Aligner_System_Comfort__c" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="MICROSCOPEREQUIRED__c" />
+                    </lightning:layoutItem>
+
+
+
+                    <lightning:layoutItem  size="12" padding="around-small">
+                        <center>
+                            <lightning:button name="nextAction"  variant="brand" label="Next" onclick="{!c.onNextActionOfSurgerySection}" />
+                        </center>
+                    </lightning:layoutItem>
+                </lightning:layout>
+            </lightning:accordionSection>
+
+            <lightning:accordionSection label="Advanced GP Only" name="advanced-gp-information">
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="MOLARGPENDO__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Places_Implants__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="12" padding="around-small">
+                        <center>
+                            <lightning:button name="nextAction"  variant="brand" label="Next" onclick="{!c.onNextActionOfAdvancedGPSection}" />
+                        </center>
+                    </lightning:layoutItem>
+
+                </lightning:layout>
+            </lightning:accordionSection>
+
+            <lightning:accordionSection label="Group Information" name="group-information">
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+                    <lightning:layoutItem  size="12" padding="around-small">
+                        <lightning:inputField fieldName="Affiliated_to_Group__c" onchange="{!c.onChangeOfGroupSelection}"/>
+                    </lightning:layoutItem>
+                    <aura:if isTrue="{!v.isGroupAffiliated}">
+
+                        <lightning:layoutItem  size="6" padding="around-small">
+                            <lightning:inputField fieldName="Group_Name__c" />
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem  size="6" padding="around-small">
+                            <lightning:inputField fieldName="Group_Email__c"  />
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem  size="6" padding="around-small">
+                            <lightning:inputField fieldName="Group_Phone__c" />
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem  size="6" padding="around-small">
+                            <lightning:inputField fieldName="Additional_Group_Details__c"  />
+                        </lightning:layoutItem>
+
+                    </aura:if>
+
+                    <lightning:layoutItem size="12" padding="around-small" >
+                        <center>
+                            <lightning:button name="nextAction" variant="brand" label="Next" onclick="{!c.onNextActionOfGroupSelection}" />
+                        </center>
+                    </lightning:layoutItem>
+
+                </lightning:layout>
+
+            </lightning:accordionSection>
+
+            <lightning:accordionSection label="Interview Information" name="interview-information">
+                <lightning:layout multipleRows="true" verticalAlign="start" horizontalAlign="space">
+
+                    <lightning:layoutItem  size="3" padding="horizontal-small">
+                        <lightning:inputField fieldName="Interested_Synergy_Plus__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="3" padding="horizontal-small">
+                        <lightning:inputField fieldName="Interested_POG__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="3" padding="horizontal-small">
+                        <lightning:inputField fieldName="Interested_SynergCE__c" onchange="{!c.onChangeOfSynergyCE}" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="3" padding="horizontal-small">
+                        <lightning:inputField fieldName="SynergyFormulary__c" onchange="{!c.onChangeOfSynergyFormulary}"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="3" padding="around-small">
+                        <lightning:inputField fieldName="Spoken_To__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="3" padding="around-small">
+                        <lightning:inputField fieldName="Have_Traveling_Equipment__c" onchange="{!c.onChangeOfTravelingEquipment}" />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="3" padding="around-small">
+                        <aura:if isTrue="{!v.isSynergyCE}">
+                            <lightning:inputField fieldName="Teaching_Certificates__c"  />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="3" padding="around-small">
+                        <aura:if isTrue="{!v.isSynergyFormulary}">
+                            <lightning:inputField fieldName="Vendor__c"  />
+                        </aura:if>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Compensation__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem size="6" padding="horizontal-small">
+                        <lightning:inputField fieldName="Compensation_daily__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="Long_Term_Career_Goals__c"  />
+                    </lightning:layoutItem>
+
+                    <!-- <lightning:layoutItem size="12" padding="horizontal-small">
+                        <lightning:inputField fieldName="Open_to_learning_new_Procedures__c"  />
+                    </lightning:layoutItem> -->
+
+                    <lightning:layoutItem  size="6" padding="around-small">
+                        <lightning:inputField aura:id = "leadEnteredBy" fieldName="Lead_entered_by__c"  />
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem  size="6" padding="around-small">
+                        <lightning:inputField aura:id = "leadCreditBy" fieldName="Lead_Credit_Assigned_To__c"  />
+                    </lightning:layoutItem>
+
+
+
+                    <lightning:layoutItem  size="12" padding="around-small">
+                        <center>
+                            <aura:if isTrue="{!!v.isButtonClicked}">
+                                <lightning:button aura:id="submit"  label="Create Lead" class="slds-m-top_small" onclick="{!c.onSubmit}" />
+                            </aura:if>
+                            &nbsp;&nbsp;
+                            <span class="slds-m-top--medium">
+                                <aura:if isTrue="{!v.errorMessage!=''}">
+                                    <span  style="color: red;border: 1px solid red;padding: 5px 5px 5px 5px;background: yellow;border-radius: 10px;">
+                                        <lightning:icon iconName="utility:warning" variant="warning" alternativeText="Utility image" size="x-small" /> Error : Scroll Up for details.
+                                    </span>
+                                </aura:if>
+                            </span>
+
+
+                        </center>
+                    </lightning:layoutItem>
+
+
+                </lightning:layout>
+
+            </lightning:accordionSection>
+
+        </lightning:accordion>
+    </lightning:recordEditForm>
+</aura:component>
