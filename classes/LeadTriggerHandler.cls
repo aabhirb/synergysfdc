@@ -66,6 +66,40 @@ public with sharing class LeadTriggerHandler {
 
             Messaging.sendEmail( lstMsgsToSend );
         }
+
+        //Ankita A: 6 Feb 2020: Send Intake Sent SMS to Practice leads
+        ApexLogger.Logger logger = ApexLogger.createLogger('Synergy Lead SMS :'+System.now());
+        Map<Id, Lead> prLeadIntakeSent20Mins = new Map<Id, Lead>();
+        for(Lead leadObject : [SELECT Id, MobilePhone, Name, Send_Intake_SMS__c FROM Lead 
+                                    WHERE Id IN: leadLst AND MobilePhone != null AND smagicinteract__SMSOptOut__c = false]){
+            //If Send Intake SMS field is true and it's value has changed
+            if(leadObject.Send_Intake_SMS__c && leadObject.Send_Intake_SMS__c != oldLeadMap.get(leadObject.Id).Send_Intake_SMS__c){
+                logger.log('Sending SMS 20 min after intake sent to practice lead '+leadObject.Name);
+                prLeadIntakeSent20Mins.put(leadObject.Id, leadObject);
+            }
+        }
+        //If the prLeadIntakeSent map contains any elements
+        if(prLeadIntakeSent20Mins.size() > 0){
+            //Query the SMS template
+            List<smagicinteract__SMS_Template__c> smsTemplates = [SELECT Id, smagicinteract__Name__c, smagicinteract__Text__c 
+                                                                    FROM smagicinteract__SMS_Template__c
+                                                                    WHERE smagicinteract__Name__c IN ('Practice Intake Sent')
+                                                                ];
+            Map<String, smagicinteract__SMS_Template__c> nameToTemplateMap = new Map<String, smagicinteract__SMS_Template__c>();
+            for(smagicinteract__SMS_Template__c template : smsTemplates){
+                nameToTemplateMap.put(template.smagicinteract__Name__c, template);
+            }
+            Boolean isError = false;
+            try{
+                //Call utility method to send SMS
+                SendSMSUtility.sendIntakeSMS(prLeadIntakeSent20Mins, nameToTemplateMap.get('Practice Intake Sent'), null);
+            } catch(Exception e){
+                isError = true;
+                logger.logException(e);
+            }
+            logger.setStatus(isError ? 'Error' : 'Success');
+            ApexLogger.commitLogs();
+        }
     }
 
 

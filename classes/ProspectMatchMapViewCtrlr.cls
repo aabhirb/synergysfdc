@@ -532,6 +532,9 @@ public with sharing class ProspectMatchMapViewCtrlr {
                                                                                         Id IN: prospectMatchIdLst  ]);
                 for(Prospect_Match__c matchVar : prospectMap.values()){
                     matchVar.Match_Stage__c = (actionType.containsIgnoreCase('gp')) ? 'Match Email Sent to GP' : 'Match Email Sent to SP';
+                    //Ankita A: 22 Jan 2020: Update the date/time when Match stage is updated to 
+                    //Match Email Sent to GP/SP
+                    matchVar.Match_Opt_in_Datetime__c = System.now(); //Set as current date/time
                     matchVar.is_Queued__c = false;
                     
                     Id sobjectId = actionType.containsIgnoreCase('gp') ? matchVar.GP_Contact__c : matchVar.SP_Contact__c;

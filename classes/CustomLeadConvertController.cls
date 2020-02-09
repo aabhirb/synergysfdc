@@ -451,6 +451,8 @@ public with sharing class CustomLeadConvertController {
 
                 LeadLst[0].Status = 'Intake Sent';
                 leadLst[0].Specialties_sent_for_intake__c = specialtiesSelected;
+                //Ankita A: Set the date/time value as well
+                LeadLst[0].Intake_Sent_Datetime__c = System.now();
                 update LeadLst;
 
                 String emailTemplateToFetch = '';

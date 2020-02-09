@@ -114,11 +114,12 @@
                 if( result[0].contactType == 'SP' ){
 
                     if('Contact' != element.contactStatus  ){
-
-
+		
+                        //Changed by : AB , 02/09 , UPdating the domain for sandbox
+                        // TODO : Change this to custom labels
                         objectLst.push({
                                             name                : element.contactNameString  ,
-                                            nameURL             : 'https://ascendorthodontics.lightning.force.com/'+element.sobjectIdToNavigate,
+                                            nameURL             : 'https://ascendorthodontics--devint.lightning.force.com/'+element.sobjectIdToNavigate,
                                             address             : element.contactAddress ,
                                             addressURL          : ( 'https://www.google.com/maps/place/'+formattedAddress ),
                                             distance            : ($A.util.isUndefinedOrNull(element.approximateDistance)) ? null : parseFloat(element.approximateDistance).toFixed(2),
@@ -134,10 +135,11 @@
                 }else{
 					if( ( 'Contact' != element.contactStatus  ) ){
 
-
+                        //Changed by : AB , 02/09 , UPdating the domain for sandbox
+                        // TODO : Change this to custom labels
                     objectLst.push({
                                         name            : element.contactNameString,
-                                        nameURL         : 'https://ascendorthodontics.lightning.force.com/'+element.sobjectIdToNavigate,
+                                        nameURL         : 'https://ascendorthodontics--devint.lightning.force.com/'+element.sobjectIdToNavigate,
                                         address			: element.contactAddress ,
                                         addressURL      : ( 'https://www.google.com/maps/place/'+formattedAddress ),
                                         distance        : ($A.util.isUndefinedOrNull(element.approximateDistance)) ? null : parseFloat(element.approximateDistance).toFixed(2),

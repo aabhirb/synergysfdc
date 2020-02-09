@@ -139,6 +139,7 @@ public with sharing class OpportunityTriggerHandler {
         List<Opportunity> lstOpportunity = new List<Opportunity>();
         List<Opportunity> lstOpportunityForPaymentTerms = new List<Opportunity>();
         List<Opportunity> lstOpportunityForDisableEmails = new List<Opportunity>();
+        List<Opportunity> lstOpportunityForPrePaymentTerms = new List<Opportunity>();
 
         for(Opportunity oppObject : oppNewList){
             //If the Concierge_Needed__c field is changed && it's value is true
@@ -147,8 +148,11 @@ public with sharing class OpportunityTriggerHandler {
                    lstOpportunity.add(oppObject);
             }else if(oppObject.Payment_Terms__c != oldMap.get(oppObject.Id).Payment_Terms__c && oppObject.Payment_Terms__c != null ) {
                 lstOpportunityForPaymentTerms.add(oppObject);
-            }else if( (oppObject.Disable_Auto_Emails__c != oldMap.get(oppObject.Id).Disable_Auto_Emails__c) || (oppObject.Disable_Auto_Emails_Provider__c != oldMap.get(oppObject.Id).Disable_Auto_Emails_Provider__c)  ) {
+            }else if((oppObject.Disable_Auto_Emails__c != oldMap.get(oppObject.Id).Disable_Auto_Emails__c) || (oppObject.Disable_Auto_Emails_Provider__c != oldMap.get(oppObject.Id).Disable_Auto_Emails_Provider__c)) {
                 lstOpportunityForDisableEmails.add(oppObject);
+            }else if( (oppObject.PREPAY_NET_TERMS__c != oldMap.get(oppObject.Id).PREPAY_NET_TERMS__c && oppObject.PREPAY_NET_TERMS__c != null ) || 
+                         (oppObject.Prepay_Fee__c != oldMap.get(oppObject.Id).Prepay_Fee__c) || (oppObject.Prepay_On__c != oldMap.get(oppObject.Id).Prepay_On__c) ) {
+                lstOpportunityForPrePaymentTerms.add(oppObject);
             }
         }
 
@@ -162,6 +166,13 @@ public with sharing class OpportunityTriggerHandler {
             //Update the Invoice object with Concierge details
             updateInvoicesForPaymentTerms(lstOpportunityForPaymentTerms);
         }
+
+        if(!lstOpportunityForPrePaymentTerms.isEmpty()) {
+            //Update the Invoice object with Concierge details
+            updateInvoicesForPrePaymentTerms(lstOpportunityForPrePaymentTerms);
+        }
+
+        
         
         if (!lstOpportunityForDisableEmails.isEmpty()) {
             updateInvoiceForDisableAutoEmails(lstOpportunityForDisableEmails);
@@ -196,16 +207,14 @@ public with sharing class OpportunityTriggerHandler {
     }
 
     public static void updateInvoicesForPaymentTerms(List<Opportunity> lstOpportunity){
-        
-        
         //If the set contains opportunity Ids
         if(!lstOpportunity.isEmpty()){
             List<Opportunity_Line_Item__c> invoicesToUpdate = new List<Opportunity_Line_Item__c>();
             //Query all the invoice objects associated with these Opportunities
             for(Opportunity_Line_Item__c invoice : [SELECT Id, Concierge_Needed__c,Treatment_Date__c,Opportunity__r.Payment_Terms__c
                                                         FROM Opportunity_Line_Item__c 
-                                                        WHERE Opportunity__c IN: lstOpportunity
-                                                          AND Status__c = 'Scheduled']){
+                                                        WHERE Opportunity__c IN: lstOpportunity AND Status__c = 'Scheduled'
+                                                      ]){
                 if(invoice.Opportunity__r.Payment_Terms__c != null && invoice.Treatment_Date__c != null ) {
                     invoice.Invoice_Due_Date__c = invoice.Treatment_Date__c.addDays(Integer.valueOf(invoice.Opportunity__r.Payment_Terms__c));
                     invoicesToUpdate.add(invoice);
@@ -213,8 +222,58 @@ public with sharing class OpportunityTriggerHandler {
             }
             
             update invoicesToUpdate;
-        }
-        
+        } 
+    }
+
+    public static void updateInvoicesForPrePaymentTerms(List<Opportunity> lstOpportunity){
+        //If the set contains opportunity Ids
+        if(!lstOpportunity.isEmpty()){
+            List<Opportunity_Line_Item__c> invoicesToUpdate = new List<Opportunity_Line_Item__c>();
+            //Query all the invoice objects associated with these Opportunities
+            for(Opportunity_Line_Item__c invoice : [SELECT Id, Concierge_Needed__c,Treatment_Date__c,Opportunity__r.PREPAY_NET_TERMS__c,Opportunity__r.Prepay_Fee__c,Prepay_Fee__c,Prepay_On__c,
+                                                            Opportunity__r.Prepay_On__c,Specilaist_Fee_Actual__c,Opportunity__r.Specialist_Fee__c
+                                                        FROM Opportunity_Line_Item__c 
+                                                        WHERE Opportunity__c IN: lstOpportunity AND Status__c = 'Scheduled'
+                                                      ]){
+                if(invoice.Opportunity__r.PREPAY_NET_TERMS__c != null && invoice.Treatment_Date__c != null ) {
+                    invoice.Prepay_Due_Date__c = invoice.Treatment_Date__c.addDays(-1 * Integer.valueOf(invoice.Opportunity__r.PREPAY_NET_TERMS__c));
+                    
+                }
+                
+                if (invoice.Prepay_Fee__c == null && invoice.Opportunity__r.Prepay_Fee__c != null) {
+                    invoice.Prepay_Fee__c =  invoice.Opportunity__r.Prepay_Fee__c;
+                } 
+
+                if (invoice.Specilaist_Fee_Actual__c == null && invoice.Opportunity__r.Specialist_Fee__c != null) {
+                    invoice.Specilaist_Fee_Actual__c = invoice.Opportunity__r.Specialist_Fee__c;
+                }
+                invoice.Prepay_On__c = invoice.Opportunity__r.Prepay_On__c;
+                invoicesToUpdate.add(invoice);
+            }
+            
+            update invoicesToUpdate;
+        } 
+    }
+
+    
+    public static void updateInvoiceForDisableAutoEmails(List<Opportunity>  lstOpportunityForDisableEmails) {
+        //If the set contains opportunity Ids
+        if(!lstOpportunityForDisableEmails.isEmpty()){
+            List<Opportunity_Line_Item__c> invoicesToUpdate = new List<Opportunity_Line_Item__c>();
+            //Query all the invoice objects associated with these Opportunities
+            for(Opportunity_Line_Item__c invoice : [SELECT Id, Concierge_Needed__c,Treatment_Date__c,Opportunity__r.Payment_Terms__c,Opportunity__r.Disable_Auto_Emails__c,Opportunity__r.Disable_Auto_Emails_Provider__c
+                                                        FROM Opportunity_Line_Item__c 
+                                                        WHERE Opportunity__c IN: lstOpportunityForDisableEmails
+                                                      ]){
+                
+                    invoice.Disable_Auto_Emails__c = invoice.Opportunity__r.Disable_Auto_Emails__c;
+                    invoice.Disable_Auto_Emails_Provider__c = invoice.Opportunity__r.Disable_Auto_Emails_Provider__c;
+                    invoicesToUpdate.add(invoice);
+                
+            }
+            
+            update invoicesToUpdate;
+        } 
     }
     
 
@@ -277,27 +336,22 @@ public with sharing class OpportunityTriggerHandler {
             update opptsToUpdate;
         }
     }
-
-     public static void updateInvoiceForDisableAutoEmails(List<Opportunity>  lstOpportunityForDisableEmails) {
-        //If the set contains opportunity Ids
-        if(!lstOpportunityForDisableEmails.isEmpty()){
-            List<Opportunity_Line_Item__c> invoicesToUpdate = new List<Opportunity_Line_Item__c>();
-            //Query all the invoice objects associated with these Opportunities
-            for(Opportunity_Line_Item__c invoice : [SELECT Id, Concierge_Needed__c,Treatment_Date__c,Opportunity__r.Payment_Terms__c,Opportunity__r.Disable_Auto_Emails__c,
-                                                        Opportunity__r.Disable_Auto_Emails_Provider__c
-                                                        FROM Opportunity_Line_Item__c 
-                                                        WHERE Opportunity__c IN: lstOpportunityForDisableEmails
-                                                      ]){
-                
-                    invoice.Disable_Auto_Emails__c = invoice.Opportunity__r.Disable_Auto_Emails__c;
-                    invoice.Disable_Auto_Emails_Provider__c = invoice.Opportunity__r.Disable_Auto_Emails_Provider__c;
-                    invoicesToUpdate.add(invoice);
-                
-            }
-            
-            update invoicesToUpdate;
-        } 
-    }
     
+    //Ankita A: 23 Jan 2020: Update date/time fields when stage is updated
+    public static void populateOppDatetimeFields(Map<Id, Opportunity> oldMap, List<Opportunity> oppNewList){
+        Set<Id> opptIds = new Set<Id>();
+        List<Opportunity> opptToUpdated = new List<Opportunity>();
+        for(Opportunity opptObject : oppNewList){
+            //If stagename is updated to Introduced
+            if(opptObject.StageName.equalsIgnoreCase('Introduced') && opptObject.StageName != oldMap.get(opptObject.Id).StageName){
+                opptIds.add(opptObject.Id);
+            }
+        }
+        for(Opportunity opptObject : [SELECT Id, Introduction_Datetime__c FROM Opportunity WHERE Id IN:opptIds]){
+            opptObject.Introduction_Datetime__c = System.now();
+            opptToUpdated.add(opptObject);
+        }
+        update opptToUpdated;
+    }
     
 }

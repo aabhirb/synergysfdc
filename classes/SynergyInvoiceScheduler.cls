@@ -11,24 +11,24 @@ public with sharing class SynergyInvoiceScheduler implements Schedulable {
         logger.log('First criteria: Sending email to Invoices whose status is Scheduled and 3 days before the Tx Day \n');
         for( Opportunity_Line_Item__c invoiceVar : SynergyInvoiceSchedulerHelper.getInvoicesDueForScheduleReminder() ) {
 
-            if ( !invoiceVar.Schedule_Confirmation_Mail_Sent__c && invoiceVar.Treatment_Date__c == Date.Today().addDays(3) && !invoiceVar.Disable_Auto_Emails__c) {
+            if ( !invoiceVar.Schedule_Confirmation_Mail_Sent__c && invoiceVar.Treatment_Date__c == Date.Today().addDays(3) ) {
                 // Send Schedule Tx Date Confirmation
                 logger.log('Sending Email for : '+invoiceVar.Name );
-                //invoiceVar.Schedule_Confirmation_Mail_Sent__c = true;
-                //invoiceListToUpdate.add(invoiceVar);
+                invoiceVar.Schedule_Confirmation_Mail_Sent__c = true;
+                invoiceListToUpdate.add(invoiceVar);
                 
-            }else if ( !invoiceVar.Schedule_Confirmation_Mail_Sent_Prelim__c && invoiceVar.Treatment_Date__c == Date.Today().addDays(10) && !invoiceVar.Disable_Auto_Emails__c) {
+            }else if ( !invoiceVar.Schedule_Confirmation_Mail_Sent_Prelim__c && invoiceVar.Treatment_Date__c == Date.Today().addDays(10)   ) {
                 // Send Schedule Tx Date Confirmation Prelim
                 logger.log('Sending Email for : '+invoiceVar.Name );
 
 
-                    //invoiceVar.Schedule_Confirmation_Mail_Sent_Prelim__c = true;
-                    //invoiceListToUpdate.add(invoiceVar);
+                    invoiceVar.Schedule_Confirmation_Mail_Sent_Prelim__c = true;
+                    invoiceListToUpdate.add(invoiceVar);
                 
             }else if ( invoiceVar.Treatment_Date__c == Date.Today() ) {
                 // Update Invoice Status as Completed
                 logger.log('Updating Status to Complete for : '+invoiceVar.Name );
-                invoiceVar.Status__c = 'Completed';
+                invoiceVar.Status__c = 'Tx Date';
                 invoiceListToUpdate.add(invoiceVar);
             }
         }
@@ -41,8 +41,8 @@ public with sharing class SynergyInvoiceScheduler implements Schedulable {
                 // Update Invoice Status as Completed
                 logger.log('Updating Status to Production Report Requested for : '+invoiceVar.Name );
 
-                    //invoiceVar.Status__c = 'Production Report Requested';
-                    //invoiceListToUpdate.add(invoiceVar);
+                    invoiceVar.Status__c = 'Production Report Requested';
+                    invoiceListToUpdate.add(invoiceVar);
 
             }
         }
@@ -54,8 +54,8 @@ public with sharing class SynergyInvoiceScheduler implements Schedulable {
                 // Update Invoice Status as Completed
                 logger.log('Sending Invoice Approval Follow Up : '+invoiceVar.Name );
 
-                    //invoiceVar.Invoice_Approval_Follow_Up_Sent__c = true;
-                    //invoiceListToUpdate.add(invoiceVar);
+                    invoiceVar.Invoice_Approval_Follow_Up_Sent__c = true;
+                    invoiceListToUpdate.add(invoiceVar);
 
             }
         }
@@ -63,17 +63,18 @@ public with sharing class SynergyInvoiceScheduler implements Schedulable {
         logger.log(' Fourth criteria: Payment follow up emails \n');
         for( Opportunity_Line_Item__c invoiceVar : SynergyInvoiceSchedulerHelper.getInvoicesDueToday() ) {
 
-            if ( invoiceVar.Invoice_Due_Date__c == Date.Today() && !invoiceVar.Disable_Auto_Emails__c) {
+            if ( invoiceVar.Invoice_Due_Date__c == Date.Today() ) {
                 logger.log('Sending Invoice Payment Follow Up : '+invoiceVar.Name );
 
-                    //invoiceVar.Invoice_Payment_Follow_Up_Sent__c = true;
-                    //invoiceListToUpdate.add(invoiceVar);
+                    invoiceVar.Invoice_Payment_Follow_Up_Sent__c = true;
+                    invoiceListToUpdate.add(invoiceVar);
 
-            }else if(invoiceVar.Invoice_Due_Date__c == Date.Today().addDays(-3) && !invoiceVar.Disable_Auto_Emails__c) {
+            }else if(invoiceVar.Invoice_Due_Date__c == Date.Today().addDays(-2) ) {
                 logger.log('Sending Invoice Payment Follow Up 2 : '+invoiceVar.Name );
 
-                    //invoiceVar.Invoice_Payment_Follow_Up_2_Sent__c = true;
-                   // invoiceListToUpdate.add(invoiceVar);
+                    invoiceVar.Invoice_Payment_Follow_Up_2_Sent__c = true;
+                    invoiceVar.Status__c = 'Invoice Past Due';
+                    invoiceListToUpdate.add(invoiceVar);
 
             }
         }
@@ -103,14 +104,14 @@ public with sharing class SynergyInvoiceScheduler implements Schedulable {
         }
 
         //Ankita A: 4 Jan 2020: Changes made for sending follow up email to Practice for Production report request
-        logger.log(' Sixth criteria: Send follow up email to Practice for Production report \n');
+        logger.log(' Sixth criteria: Send follow up email to Practice for Production report every 7 days\n');
         for(Opportunity_Line_Item__c invoiceVar : SynergyInvoiceSchedulerHelper.getInvoicesWithPRRequested()){
-            //If Practice is not yet notified and 5 days after treatment date
-            if(!invoiceVar.Practice_Post_Prod_FU_Sent__c && (invoiceVar.Treatment_Date__c.addDays(5) == Date.Today() && !invoiceVar.Disable_Auto_Emails__c)){
+            //Ankita A: 4 Feb: Notify Practice after every 7 days from treatment date
+            if(Math.mod(invoiceVar.Treatment_Date__c.daysBetween(System.today()), 7) == 0){
                 //Send follow up email to Practice for Production report
                 logger.log('Sending email to ' +invoiceVar.Name);
-                //invoiceVar.Practice_Post_Prod_FU_Sent__c = true;
-                //invoiceListToUpdate.add(invoiceVar);
+                invoiceVar.Practice_Post_Prod_FU_Sent__c = true;
+                invoiceListToUpdate.add(invoiceVar);
             }
         }
 

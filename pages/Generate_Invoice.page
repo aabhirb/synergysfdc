@@ -46,9 +46,14 @@
                         </tr>
                         <tr>
                             <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Balance Due</b></span></td>
-                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><FONT COLOR="red" style="font-weight: bold;font-size: 15px;">${!opp.Invoice_Amount__c}</FONT></span> </td>
+                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><FONT COLOR="red" style="font-weight: bold;font-size: 15px;">${!opp.OD_Payment_Balance__c}</FONT></span> </td>
                         </tr>
-
+                        <apex:outputPanel rendered="{!opp.OD_Payment_Amount__c != 0 && opp.OD_Payment_Amount__c != null }">
+                            <tr>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Amount Paid</b></span></td>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.OD_Payment_Amount__c}</span> </td>
+                            </tr>
+                        </apex:outputPanel>
                     </table>
                     <br/>
                     <div>
@@ -580,6 +585,21 @@
                 <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">Total Billed</span></b></td>
                 <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.Invoice_Amount__c}</span></b></td>
             </tr>
+
+            <apex:outputPanel rendered="{!opp.OD_Payment_Amount__c != 0 && opp.OD_Payment_Amount__c != null }">
+                <tr >
+                
+                    <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">Amount Paid</span></b></td>
+                    <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.OD_Payment_Amount__c}</span></b></td>
+                </tr>
+
+                 <tr >
+                    <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">Amount Balance</span></b></td>
+                    <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.OD_Payment_Balance__c}</span></b></td>
+                </tr>
+            </apex:outputPanel>
+
+
 
         </table>
         <br/>

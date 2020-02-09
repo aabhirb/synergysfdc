@@ -57,7 +57,7 @@ public class SynergyInvoiceSchedulerTest{
         //Ankita A: Changes related to Prod reminder email
         Opportunity_Line_Item__c invoiceObj = new Opportunity_Line_Item__c(
                                                 Opportunity__c = opptObject.Id,
-                                                Treatment_Date__c = System.Today() + 5,
+                                                Treatment_Date__c = System.Today() + 7,
                                                 Invoice_Due_Date__c = System.today(),
                                                 Status__c = 'Production Report Requested');
         
@@ -95,12 +95,16 @@ public class SynergyInvoiceSchedulerTest{
         con.lastname = 'contact';
         con.AccountId = acc.Id;
         con.Email = 'test2@test.com';
+        con.OM_Email__c = 'test2_om@test.com'; 
+        con.Practice_Email__c = 'test2_pr@test.com';
         insert con;
         
         Contact con2 = new Contact();
         con2.firstname = 'primary';
         con2.lastname = 'contact';
         con2.Email = 'test@test.com';
+        con2.OM_Email__c = 'test_om@test.com'; 
+        con2.Practice_Email__c = 'test_pr@test.com';
         insert con2;
         
         Opportunity opp = new Opportunity();

@@ -5,7 +5,8 @@ public class OpportunityLineItemTriggerTest {
     @testSetup
     private static void createTestData(){
         //Create a record of Invoice object with status as Scheduled and Opportunity with concierge needed as true
-        Contact contactObj = new Contact(firstname = 'John', lastname='Smith', email = 'abc@test.com');
+        Contact contactObj = new Contact(firstname = 'John', lastname='Smith', email = 'abc@test.com',
+                                        OM_Email__c = 'abc_om@test.com', Practice_Email__c = 'abc_pr@test.com');
         insert contactObj;
         
         Opportunity opptObject = new Opportunity(Name='Test Opportunity',
@@ -30,7 +31,8 @@ public class OpportunityLineItemTriggerTest {
         List<Opportunity_line_item__c> oliList = new List<Opportunity_line_item__c>();
         Map<Id,Opportunity_line_item__c> mapOfOli = new Map<Id,Opportunity_line_item__c>();
         
-        Contact con = new Contact(firstname = 'abc', lastname='test', email = 'abc@test.com');
+        Contact con = new Contact(firstname = 'abc', lastname='test', email = 'abc@test.com',
+                                 OM_Email__c = 'abc_om@test.com', Practice_Email__c = 'abc_pr@test.com');
         insert con;
         
         Opportunity opp = new Opportunity(Name='test opp',StageName='Closed Won', Probability = 100, CloseDate=system.today());

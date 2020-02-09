@@ -1,0 +1,166 @@
+<apex:page standardController="Opportunity_Line_Item__c" extensions="generatePrePayInvoiceController">
+
+    <apex:form >
+     <apex:includeLightning />
+        <script>
+            function show_alert(){
+                //Ankita A: Changed the message
+                var msg = "PDF saved and URL generated, Ready for sending for approval.";
+                if(!alert(msg)) {
+                    sforce.one.navigateToSObject('{!posId}');
+                    //window.location.reload();
+                    //sforce.one.navigateToURL('/'+'{!posId}',true); 
+                    //'ContentDocumentLinks'
+                    //sforce.one.navigateToRelatedList('AttachedContentDocuments','{!posId}');
+                }
+            }
+        </script>
+
+
+
+        <!-- <apex:commandButton action="{!saveAttachement}" value="Save PDF" status="as" OnClick="show_alert()" /> -->
+
+
+        <table style="height:100%;width:100%;">
+            <tr>
+                <td style="width: 60%;">
+                    <table>
+                        <!--<tr>
+
+                            <td colspan="1"><apex:image url="{!$Resource.synergy_icon}" width="130px" height="35px" /></td>
+                        </tr>
+                        <br/>
+                        <br/>-->
+                        <tr>
+                            <td > <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <strong>Pre-Invoice #</strong> </span> </td>
+                            <td bgcolor="#E0FFFF" ><span style="font-family: Arial Unicode MS; font-size: 12pt;"> {!opp.name} </span> </td>
+                        </tr>
+
+                        <tr>
+                            <td> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Date Of Service</b> </span> </td>
+                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"> {!opp.Treatment_Date_Formatted__c} </span> </td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Prepay Due Date</b> </span> </td>
+                            <td > <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <FONT COLOR="red" style="font-weight: bold;font-size: 15px;">{!opp.Prepay_Due_Date_Formatted__c}</FONT> </span> </td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Prepay Fee</b></span></td>
+                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><FONT COLOR="red" style="font-weight: bold;font-size: 15px;">${!opp.Prepay_Fee__c}</FONT></span> </td>
+                        </tr>
+
+                    </table>
+                    <br/>
+                    <div>
+                        <table>
+                            <tr>
+                                <td style="width: 60%;">
+                                    <table>
+                                        <tr>
+                                            <td> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b> <u> Practice Details </u> </b> </span> </td>
+                                        </tr>
+
+                                        <tr >
+                                            <td> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>{!opp1.GP_Contact__r.firstname} {!opp1.GP_Contact__r.lastname}</b> </span> </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp1.GP_Contact__r.Formulated_MailingAddress__c} </span> </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp1.GP_Contact__r.MobilePhone} </span> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+
+                               
+                            </tr>
+                        </table>
+                    </div>
+
+                </td>
+                <!-- <td style="text-align:right; align:right;">
+                 <table style="height:100%;width:100%;">
+
+
+
+                 </table>
+                </td>-->
+            </tr>
+        </table>
+
+        <br/>
+        <br/>
+        <br/>
+      
+
+        <!-- Payment section -->
+        
+        <apex:outputPanel rendered="{!!or(opp1.Provider_Synergy_Plus__c,opp1.Cheques_go_to_Synergy__c)}"> 
+            <center>
+             <div> 
+                 <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>*** Please Make Check Payable To: </b> &nbsp; <b>
+                <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name != null}">
+                    {!opp1.Primary_Contact__r.Account.Name}
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name == null}">
+                 {!opp1.Primary_Contact__r.firstname} {!opp1.Primary_Contact__r.lastname}
+                 </apex:outputPanel>  NOT Synergy Specialists ***</b> </span> 
+             </div>
+           
+             <div>
+                <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> *** Mail to {!opp1.Primary_Contact__r.Formulated_MailingAddress__c} *** </span> </b>
+             </div>
+             <div>
+                <b>  <span style="font-family: Arial Unicode MS; font-size: 12pt;">  * Reference DOS: {!opp.Treatment_Date_Formatted__c} on the check* </span> </b>
+             </div>
+            </center>   
+        </apex:outputPanel>
+  
+        <apex:outputPanel rendered="{!or(opp1.Provider_Synergy_Plus__c,opp1.Cheques_go_to_Synergy__c)}"> 
+             
+             <center>
+                 <div> 
+                    <apex:outputPanel rendered="{!opp1.Provider_Synergy_Plus__c}">
+                        <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;">*** Please Make Check Payable To:  &nbsp;  Shervin Molayem Dental Corporation *** </span> </b>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!!opp1.Provider_Synergy_Plus__c}">
+                        <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>*** Please Make Check Payable To: </b> &nbsp; <b>
+                        <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name != null}">
+                            {!opp1.Primary_Contact__r.Account.Name}
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name == null}">
+                            {!opp1.Primary_Contact__r.firstname} {!opp1.Primary_Contact__r.lastname}
+                         </apex:outputPanel>  NOT Synergy Specialists ***</b> </span> 
+                    </apex:outputPanel>
+                 </div>
+                 
+               
+                 <div>
+                    <apex:outputPanel rendered="{!opp1.Provider_Synergy_Plus__c}">
+                        <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;">*** Mail to : &nbsp; 530 East Los Angeles Ave # 115 - 363, Moorpark, CA 93021 *** </span> </b>       
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!!opp1.Provider_Synergy_Plus__c}">
+                        <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;">*** Mail to : &nbsp; Synergy Specialists c/o {!opp1.Primary_Contact__r.firstname} {!opp1.Primary_Contact__r.lastname} &nbsp; 530 East Los Angeles Ave # 115 - 363, Moorpark, CA 93021 *** </span> </b>
+                    </apex:outputPanel>
+                    
+                 </div>
+                 <div>
+                     <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> * Reference DOS: {!opp.Treatment_Date_Formatted__c} on the check* </span> </b>
+                 </div>
+                  <apex:outputPanel rendered="{!opp1.Special_Payment_Instructions__c != null}">
+                        <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;">* Special Payment Instructions : &nbsp; {!opp1.Special_Payment_Instructions__c} * </span> </b>
+                    </apex:outputPanel>
+
+            </center>
+
+        </apex:outputPanel>
+        <!-- Payment section -->
+        <table style="height:100%;width:100%; position: relative; top: 200; bottom: 0; left: 0; right: 0;border:0px solid">
+            <tr>
+                <td><apex:commandButton action="{!saveAttachement}" value="Save PDF" OnClick="show_alert()"/></td>
+            </tr>
+        </table>
+    </apex:form>
+</apex:page>

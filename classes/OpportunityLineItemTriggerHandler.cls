@@ -17,7 +17,11 @@ public with sharing class OpportunityLineItemTriggerHandler {
   
         //Ankita A: 9 Jan 2020: Sending cancellation email when status is changed to Cancelled
         List<Opportunity_Line_Item__c> invoiceLstForCancellation = new List<Opportunity_Line_Item__c>();
+
         List<Opportunity_Line_Item__c> invoiceLstToSendToPractice = new List<Opportunity_Line_Item__c>();
+        List<Opportunity_Line_Item__c> invoiceLstForApprovalFollowup = new List<Opportunity_Line_Item__c>();
+        List<Opportunity_Line_Item__c> invoiceLstForPaymentDue = new List<Opportunity_Line_Item__c>();
+        List<Opportunity_Line_Item__c> invoiceLstForPaymentDueFollowUp = new List<Opportunity_Line_Item__c>();
 
         Set<Id> opptyIdToQuery = new Set<Id>();
         Map<Id,Opportunity> opportunityMap;
@@ -45,6 +49,8 @@ public with sharing class OpportunityLineItemTriggerHandler {
                     //Ankita A: 4 Jan 2020: Changes made for sending follow up email to Practice for Production report request
                     //If Practice is yet not notified for Production report follow up
                 } else if(lineItem.Practice_Post_Prod_FU_Sent__c && lineItem.Practice_Post_Prod_FU_Sent__c != oldOLIMap.get(lineItem.Id).Practice_Post_Prod_FU_Sent__c){
+                    //Ankita A: 4 Feb 2020: Update the Practice_Post_Prod_FU_Sent__c as false so that email is triggered after 7 days again
+                    lineItem.Practice_Post_Prod_FU_Sent__c = false;
                     //Add the invoice to List for sending email
                     invoiceLstForProdReport.add(lineItem);
                     opptyIdToQuery.add(lineItem.Opportunity__c);
@@ -58,7 +64,18 @@ public with sharing class OpportunityLineItemTriggerHandler {
                     //Add the invoice to List for sending email
                     invoiceLstToSendToPractice.add(lineitem);
                     opptyIdToQuery.add(lineItem.Opportunity__c);
+                } else if (lineItem.Invoice_Approval_Follow_Up_Sent__c && oldOLIMap != null && lineItem.Invoice_Approval_Follow_Up_Sent__c != oldOLIMap.get(lineItem.Id).Invoice_Approval_Follow_Up_Sent__c) {
+                    invoiceLstForApprovalFollowup.add(lineitem);
+                    opptyIdToQuery.add(lineItem.Opportunity__c);
+                } else if (lineItem.Invoice_Payment_Follow_Up_Sent__c && oldOLIMap != null && lineItem.Invoice_Payment_Follow_Up_Sent__c != oldOLIMap.get(lineItem.Id).Invoice_Payment_Follow_Up_Sent__c) {
+                    invoiceLstForPaymentDue.add(lineitem);
+                    opptyIdToQuery.add(lineItem.Opportunity__c);
+                } else if (lineItem.Invoice_Payment_Follow_Up_2_Sent__c && oldOLIMap != null && lineItem.Invoice_Payment_Follow_Up_2_Sent__c != oldOLIMap.get(lineItem.Id).Invoice_Payment_Follow_Up_2_Sent__c) {
+                    invoiceLstForPaymentDueFollowUp.add(lineitem);
+                    opptyIdToQuery.add(lineItem.Opportunity__c);
                 }
+
+                
             }
 
 
@@ -68,28 +85,43 @@ public with sharing class OpportunityLineItemTriggerHandler {
             for( EmailTemplate template : [ SELECT Id,Name,DeveloperName from EmailTemplate where
                                                     DeveloperName IN ('Specialists_Schedule_COnfirmation','Specialists_Schedule_Confirmation_Prelim','SP_Post_Production_1',
                                                                         'GP_Post_Production_1','SP_Post_Production_2','GP_Post_Production_2','SP_Tx_Date_Cancellation',
-                                                                        'Prod_Report_Request_Reminder','Practice_Post_Production_FU','Send_Invoice_For_Payment_CL') ] ){
+                                                                        'Prod_Report_Request_Reminder','Practice_Post_Production_FU','Send_Invoice_For_Payment_CL','Send_Invoice_CL_Lightning_Follow_Up',
+                                                                        'Invoice_Due_For_Payment_CL','Invoice_Due_Follow_up_Payment_CL')] ){
                 emailTemplateMap.put(template.DeveloperName , template.Id );
             }
 
-
-
             if(!opptyIdToQuery.isEmpty())
-                opportunityMap = new Map<Id,Opportunity>( [SELECT Id,Name,Primary_Contact__c, Primary_Contact__r.Email, GP_Contact__c,GP_Contact__r.OM_EMail__c,GP_Contact__r.Email,GP_Contact__r.HasOptedOutOfEmail,
-                                                                    (SELECT Id From Opportunity_Line_Item__r 
-                                                                            where 
-                                                                            Status__c NOT IN ('Scheduled', 'Cancelled')) from Opportunity where Id IN: opptyIdToQuery ] );
+                opportunityMap = new Map<Id,Opportunity>( [SELECT Id,Name,
+                                                           Primary_Contact__c, Primary_Contact__r.Email, 
+                                                           Primary_Contact__r.HasOptedOutOfEmail,
+                                                           GP_Contact__c, GP_Contact__r.Email,
+                                                           GP_Contact__r.OM_EMail__c, GP_Contact__r.Practice_Email__c,
+                                                           GP_Contact__r.HasOptedOutOfEmail,
+                                                           (SELECT Id From Opportunity_Line_Item__r 
+                                                            where 
+                                                            Status__c NOT IN ('Scheduled', 'Cancelled')) from Opportunity where Id IN: opptyIdToQuery ] );
 
             if( !oliLstToSendEmail.isEmpty() ){
                  for(Opportunity_Line_Item__c lineItem : oliLstToSendEmail){
-                     if(opportunityMap.containsKey( lineItem.Opportunity__c ) && !lineItem.Disable_Auto_Emails__c){
-                        Messaging.SingleEmailMessage emailMessage = Utility.sendEmail( lineItem.Id ,  emailTemplateMap.get('Specialists_Schedule_COnfirmation') , opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__c , 'SUPPORT');
+                     if(opportunityMap.containsKey( lineItem.Opportunity__c )){
+                        Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
+
+                        Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id,
+                                                            emailTemplateMap.get('Specialists_Schedule_COnfirmation'),
+                                                            opptObject.GP_Contact__c,
+                                                            !opptObject.GP_Contact__r.HasOptedOutOfEmail);
+                                                            //Ankita A: treat target object as recipient if Contact has not opted out of email
                         //Prod Issue where Primary Contact Email is null
                         List<String> ccEmails = new List<String>{'Support@synergyspecialists.com' , 'julia@synergyspecialists.com'};
-                        Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
+                        
                         //If GP Contact is not null and OM Email is not blank, then add 
                         if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.OM_EMail__c)) {
                             ccEmails.add(opptObject.GP_Contact__r.OM_EMail__c);
+                        }
+
+                        //If GP Contact is not null and Other Email is not blank, then add 
+                        if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.Practice_Email__c)) {
+                            ccEmails.add(opptObject.GP_Contact__r.Practice_Email__c);
                         }
 
                         //If Primary Contact is not null and it's Email is not blank, then add
@@ -112,15 +144,25 @@ public with sharing class OpportunityLineItemTriggerHandler {
 
             if( !oliLstToSendPRPrelimEmail.isEmpty() ){
                  for(Opportunity_Line_Item__c lineItem : oliLstToSendPRPrelimEmail){
-                     if(opportunityMap.containsKey( lineItem.Opportunity__c ) && !lineItem.Disable_Auto_Emails__c ){
-                         Messaging.SingleEmailMessage emailMessage = Utility.sendEmail( lineItem.Id ,  emailTemplateMap.get('Specialists_Schedule_Confirmation_Prelim') , opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__c ,'SUPPORT' );
-                         
-                         //Prod Issue where Primary Contact Email is null
-                        List<String> ccEmails = new List<String>{'Support@synergyspecialists.com' , 'julia@synergyspecialists.com'};
+                     if(opportunityMap.containsKey( lineItem.Opportunity__c )){
                         Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
+                        Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id ,
+                                                    emailTemplateMap.get('Specialists_Schedule_Confirmation_Prelim') ,
+                                                    opptObject.GP_Contact__c,
+                                                    !opptObject.GP_Contact__r.HasOptedOutOfEmail);
+                                                    //Ankita A: treat target object as recipient if Contact has not opted out of email
+                         
+                        //Prod Issue where Primary Contact Email is null
+                        List<String> ccEmails = new List<String>{'Support@synergyspecialists.com' , 'julia@synergyspecialists.com'};
+                        
                         //If OM Email is not blank, then add 
                         if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.OM_EMail__c)) {
                             ccEmails.add(opptObject.GP_Contact__r.OM_EMail__c);
+                        }
+
+                        //If GP Contact is not null and Other Email is not blank, then add 
+                        if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.Practice_Email__c)) {
+                            ccEmails.add(opptObject.GP_Contact__r.Practice_Email__c);
                         }
 
                         //If Primary Contact Email is not blank, then add
@@ -144,55 +186,75 @@ public with sharing class OpportunityLineItemTriggerHandler {
             if(!oliLstToRequestPREmail.isEmpty()){
                 for(Opportunity_Line_Item__c lineItem : oliLstToRequestPREmail){
                     System.debug('Contains =>'+opportunityMap.containsKey( lineItem.Opportunity__c ));
-                    if(opportunityMap.containsKey( lineItem.Opportunity__c ) ){
+                    if(opportunityMap.containsKey( lineItem.Opportunity__c )){
                         System.debug('Treatment Count =>'+opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r);
-                        if( opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r != null && opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r.size() <= 1){
-                            if(!lineItem.Disable_Auto_Emails_Provider__c) {
-                                Messaging.SingleEmailMessage emailMessage = Utility.sendEmail( lineItem.Id ,  emailTemplateMap.get('SP_Post_Production_1') , opportunityMap.get( lineItem.Opportunity__c ).Primary_Contact__c ,'SUPPORT');
-                                emailMessage.setCcAddresses( new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com','docs@synergyspecialists.co' } );
-                                emailMessage.setReplyTo('docs@synergyspecialists.co');
-                                singleEmailMsgLst.add(emailMessage);
-                            }
-
-                            if(!lineItem.Disable_Follow_up__c) {
-
-                                Messaging.SingleEmailMessage emailMessage = new Messaging.SingleEmailMessage();
-
-
-                                emailMessage = Utility.sendEmail( lineItem.Id ,  emailTemplateMap.get('GP_Post_Production_1') , opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__c ,'SUPPORT');
-                                if(String.isBlank(opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__r.OM_EMail__c)) {
-                                    emailMessage.setCcAddresses( new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com' , 'docs@synergyspecialists.co'} ); 
-                                } else {
-                                    emailMessage.setCcAddresses( new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com' , 'docs@synergyspecialists.co',opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__r.OM_EMail__c} ); 
-                                }
-                                
-                                emailMessage.setReplyTo('docs@synergyspecialists.co');
-                                singleEmailMsgLst.add(emailMessage);
-
-                            }
-
-                        }else if(opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r != null && opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r.size() > 1 ){
-
+                        if( opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r != null && opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r.size() <= 1 ){
+                            Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
+                            Messaging.SingleEmailMessage emailMessage = Utility.sendEmail( lineItem.Id ,
+                                                                    emailTemplateMap.get('SP_Post_Production_1'),
+                                                                    opportunityMap.get( lineItem.Opportunity__c ).Primary_Contact__c,
+                                                                    !opptObject.Primary_Contact__r.HasOptedOutOfEmail);
+                                                                    //Ankita A: treat target object as recipient if Contact has not opted out of email
                             
-                            if(!lineItem.Disable_Auto_Emails_Provider__c) {
-                                Messaging.SingleEmailMessage emailMessage = Utility.sendEmail( lineItem.Id ,  emailTemplateMap.get('SP_Post_Production_2') , opportunityMap.get( lineItem.Opportunity__c ).Primary_Contact__c,'SUPPORT' );
-                                emailMessage.setCcAddresses( new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com', 'docs@synergyspecialists.co' } ); 
-                                emailMessage.setReplyTo('docs@synergyspecialists.co');
-                                singleEmailMsgLst.add(emailMessage);
-                            }
-                            if(!lineItem.Disable_Follow_up__c) {
-                                Messaging.SingleEmailMessage emailMessage = new Messaging.SingleEmailMessage();
+                            emailMessage.setCcAddresses( new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com','docs@synergyspecialists.co' } );
+                            emailMessage.setReplyTo('docs@synergyspecialists.co');
+                            singleEmailMsgLst.add(emailMessage);
 
-                                emailMessage = Utility.sendEmail( lineItem.Id ,  emailTemplateMap.get('GP_Post_Production_2') , opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__c ,'SUPPORT');
-                                if(String.isBlank(opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__r.OM_EMail__c)) {
-                                    emailMessage.setCcAddresses( new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com' , 'docs@synergyspecialists.co'} ); 
-                                } else {
-                                    emailMessage.setCcAddresses( new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com' , 'docs@synergyspecialists.co',opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__r.OM_EMail__c} ); 
-                                }
-                                emailMessage.setReplyTo('docs@synergyspecialists.co');
-                                singleEmailMsgLst.add(emailMessage);
-                            }
+                            emailMessage = new Messaging.SingleEmailMessage();
+
+                            emailMessage = Utility.sendEmail( lineItem.Id,  
+                                            emailTemplateMap.get('GP_Post_Production_1'),
+                                            opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__c,
+                                            !opptObject.GP_Contact__r.HasOptedOutOfEmail);
+                                            //Ankita A: treat target object as recipient if Contact has not opted out of email
                             
+                            List<String> ccEmails = new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com' , 'docs@synergyspecialists.co'};
+                            
+                            //If GP Contact is not null and OM Email is not blank, then add 
+                            if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.OM_EMail__c)) {
+                                ccEmails.add(opptObject.GP_Contact__r.OM_EMail__c);
+                            }
+
+                            //If GP Contact is not null and Other Email is not blank, then add 
+                            if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.Practice_Email__c)) {
+                                ccEmails.add(opptObject.GP_Contact__r.Practice_Email__c);
+                            }
+
+                            emailMessage.setReplyTo('docs@synergyspecialists.co');
+                            singleEmailMsgLst.add(emailMessage);
+
+                        }else if(opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r != null && opportunityMap.get( lineItem.Opportunity__c ).Opportunity_Line_Item__r.size() > 1){
+                            Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
+                            Messaging.SingleEmailMessage emailMessage = Utility.sendEmail( lineItem.Id ,
+                                                                emailTemplateMap.get('SP_Post_Production_2'),
+                                                                opportunityMap.get( lineItem.Opportunity__c ).Primary_Contact__c,
+                                                                !opptObject.Primary_Contact__r.HasOptedOutOfEmail);
+                                                                //Ankita A: treat target object as recipient if Contact has not opted out of email
+                            emailMessage.setCcAddresses( new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com', 'docs@synergyspecialists.co' } ); 
+                            emailMessage.setReplyTo('docs@synergyspecialists.co');
+                            singleEmailMsgLst.add(emailMessage);
+
+                            emailMessage = new Messaging.SingleEmailMessage();
+
+                            emailMessage = Utility.sendEmail( lineItem.Id,
+                                                emailTemplateMap.get('GP_Post_Production_2'),
+                                                opportunityMap.get( lineItem.Opportunity__c ).GP_Contact__c,
+                                                !opptObject.GP_Contact__r.HasOptedOutOfEmail);
+                                                //Ankita A: treat target object as recipient if Contact has not opted out of email
+                            
+                            List<String> ccEmails = new List<String>{ 'Support@synergyspecialists.com' , 'julia@synergyspecialists.com' , 'docs@synergyspecialists.co'};
+                            
+                            //If GP Contact is not null and OM Email is not blank, then add 
+                            if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.OM_EMail__c)) {
+                                ccEmails.add(opptObject.GP_Contact__r.OM_EMail__c);
+                            }
+
+                            //If GP Contact is not null and Other Email is not blank, then add 
+                            if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.Practice_Email__c)) {
+                                ccEmails.add(opptObject.GP_Contact__r.Practice_Email__c);
+                            }
+                            emailMessage.setReplyTo('docs@synergyspecialists.co');
+                            singleEmailMsgLst.add(emailMessage);
                         }
 
                     }
@@ -215,11 +277,11 @@ public with sharing class OpportunityLineItemTriggerHandler {
                 User userObject = [SELECT Id, Name, Email FROM User WHERE Username LIKE 'support@synergyspecialists.co%' LIMIT 1];
                 if(userObject != null){
                     for(Opportunity_Line_Item__c lineItem : invoiceLstForSC){
-                        if(opportunityMap.containsKey( lineItem.Opportunity__c ) && !lineItem.Disable_Auto_Emails_Provider__c){
+                        if(opportunityMap.containsKey( lineItem.Opportunity__c )){
                             Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id, 
                                                                                         emailTemplateMap.get('Prod_Report_Request_Reminder'), 
                                                                                         opportunityMap.get( lineItem.Opportunity__c ).Primary_Contact__c,
-                                                                                        false,'SUPPORT');
+                                                                                        false);
 
                             //Set the setSaveAsActivity as false as we are sending email to User
                             emailMessage.setSaveAsActivity(false);
@@ -238,16 +300,18 @@ public with sharing class OpportunityLineItemTriggerHandler {
                 singleEmailMsgLst = new List<Messaging.SingleEmailMessage>();
                 for(Opportunity_Line_Item__c lineItem : invoiceLstForProdReport){
                     //Follow up checkbox is enabled
-                    if(opportunityMap.containsKey(lineItem.Opportunity__c) && !lineItem.Disable_Auto_Emails__c){
+                    if(opportunityMap.containsKey(lineItem.Opportunity__c) && !lineItem.Disable_Follow_up__c){
+                        Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
                         Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id ,  
-                                                                                        emailTemplateMap.get('Practice_Post_Production_FU'), 
-                                                                                        opportunityMap.get(lineItem.Opportunity__c).GP_Contact__c ,'SUPPORT');
+                                                                        emailTemplateMap.get('Practice_Post_Production_FU'), 
+                                                                        opptObject.GP_Contact__c,
+                                                                        !opptObject.GP_Contact__r.HasOptedOutOfEmail);
+                                                                        //Ankita A: treat target object as recipient if Contact has not opted out of email);
                         emailMessage.setCcAddresses(new List<String>{'Support@synergyspecialists.com'} );
                         //SetToAddress as Practice OM Email
-                        //Get the Provider Practice OM email and split to get Practice OM Email
-                        List<String> omEmailLst = lineItem.Provider_Practice_OM_Email__c.split('; ');
-                        if(omEmailLst.size() > 1 && String.isNotBlank(omEmailLst[0])){
-                            emailMessage.setToAddresses(new List<String>{omEmailLst[0]});
+                        //If GP Contact is not null and OM Email is not blank, then add 
+                        if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.OM_EMail__c)) {
+                            emailMessage.setToAddresses(new List<String>{opptObject.GP_Contact__r.OM_EMail__c});
                         }
                         singleEmailMsgLst.add(emailMessage);
                     }
@@ -258,54 +322,61 @@ public with sharing class OpportunityLineItemTriggerHandler {
                 }
                 
                 //Done for creating activity
-                for(Opportunity_Line_Item__c lineItem : oliLstToSendEmail) {
+                for(Opportunity_Line_Item__c lineItem : invoiceLstForProdReport) {
                     Utility.synchActivity(lineItem.Id , lineItem.Opportunity__c );
                 }
+                //Ankita A: 4 Feb 2020: Update the lineitems with Practice Prod FU Sent as false
+                update invoiceLstForProdReport;
             }
             
             //Ankita A: 9 Jan 2020: Sending cancellation email when status is changed to Cancelled
             if(invoiceLstForCancellation.size() > 0){
                 singleEmailMsgLst = new List<Messaging.SingleEmailMessage>();
                 for(Opportunity_Line_Item__c lineItem : invoiceLstForCancellation){
-                    if(opportunityMap.containsKey(lineItem.Opportunity__c) && !lineItem.Disable_Auto_Emails_Provider__c){
+                    if(opportunityMap.containsKey(lineItem.Opportunity__c)){
+                        Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
                         Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id ,  
-                                                                                        emailTemplateMap.get('SP_Tx_Date_Cancellation'), 
-                                                                                        opportunityMap.get(lineItem.Opportunity__c).Primary_Contact__c);
-                        //SetToAddress as Practice OM Email and Practice Email
+                                                                    emailTemplateMap.get('SP_Tx_Date_Cancellation'), 
+                                                                    opptObject.Primary_Contact__c,
+                                                                    !opptObject.Primary_Contact__r.HasOptedOutOfEmail);
+                                                                    //Ankita A: treat target object as recipient if Contact has not opted out of email
+                        //SetToAddress as GP Email and Practice OM Email
                         List<String> toAddress = new List<String>();
-                        toAddress.add(opportunityMap.get(lineItem.Opportunity__c).GP_Contact__c);
+
+                        //If GP Contact is not null and Email is not blank, then add 
+                        if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.Email)) {
+                            toAddress.add(opptObject.GP_Contact__c);
+                        }                        
                         
-                        //Get the Provider Practice OM email and split to get Practice OM Email
-                        List<String> omEmailLst = lineItem.Provider_Practice_OM_Email__c.split('; ');
-                        if(omEmailLst.size() > 1 && String.isNotBlank(omEmailLst[0])){
-                            toAddress.add(omEmailLst[0]);
+                        //If GP Contact is not null and OM Email is not blank, then add 
+                        if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.OM_EMail__c)) {
+                            toAddress.add(opptObject.GP_Contact__r.OM_EMail__c);
                         }
                         emailMessage.setToAddresses(toAddress);
-                        emailMessage.setCcAddresses(new List<String>{'Support@synergyspecialists.com', 'nina@synergyspecialists.com'});
+                        //Masking
+                        emailMessage.setCcAddresses(new List<String>{'Support@synergyspecialistsfs.com', 'nina@synergyspecialistsfs.com'});
                         singleEmailMsgLst.add(emailMessage);
                     }
                 }
                 
-                if(!singleEmailMsgLst.isEmpty()){
-                    Messaging.sendEmail(singleEmailMsgLst);
-                }
+                Messaging.sendEmail(singleEmailMsgLst);
                 
                 //Done for creating activity
-                for(Opportunity_Line_Item__c lineItem : oliLstToSendEmail) {
+                for(Opportunity_Line_Item__c lineItem : invoiceLstForCancellation) {
                     Utility.synchActivity(lineItem.Id , lineItem.Opportunity__c );
                 }
             }
-
+            
             if (!invoiceLstToSendToPractice.isEmpty()) {
                 singleEmailMsgLst = new List<Messaging.SingleEmailMessage>();
                 for(Opportunity_Line_Item__c lineItem : invoiceLstToSendToPractice){
-                    if(opportunityMap.containsKey(lineItem.Opportunity__c) && !lineItem.Disable_Auto_Emails__c){
+                    if(opportunityMap.containsKey(lineItem.Opportunity__c)){
                         Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
-                        if(String.isNotBlank(opptObject.GP_Contact__r.Email)) {
+                            if(String.isNotBlank(opptObject.GP_Contact__r.Email)) {
                                 Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id ,  
                                                                         emailTemplateMap.get('Send_Invoice_For_Payment_CL'), 
                                                                         opptObject.GP_Contact__c,
-                                                                        !opptObject.GP_Contact__r.HasOptedOutOfEmail,'SUPPORT');
+                                                                        !opptObject.GP_Contact__r.HasOptedOutOfEmail);
                                 
                             
                             //SetToAddress as GP Email and Practice OM Email
@@ -319,7 +390,7 @@ public with sharing class OpportunityLineItemTriggerHandler {
                             }
                             
                             //Masking
-                            emailMessage.setCcAddresses(new List<String>{'Support@synergyspecialists.com'});
+                            emailMessage.setCcAddresses(new List<String>{'Support@synergyspecialistsfs.com'});
                             singleEmailMsgLst.add(emailMessage);
                         }
                     }
@@ -328,11 +399,119 @@ public with sharing class OpportunityLineItemTriggerHandler {
                  Messaging.sendEmail(singleEmailMsgLst);
                     
                 //Done for creating activity
-                for(Opportunity_Line_Item__c lineItem : oliLstToSendEmail) {
+                for(Opportunity_Line_Item__c lineItem : invoiceLstToSendToPractice) {
                     Utility.synchActivity(lineItem.Id , lineItem.Opportunity__c );
                 }
             }
+
+            if (!invoiceLstForApprovalFollowup.isEmpty()) {
+                singleEmailMsgLst = new List<Messaging.SingleEmailMessage>();
+                for(Opportunity_Line_Item__c lineItem : invoiceLstForApprovalFollowup){
+                    if(opportunityMap.containsKey(lineItem.Opportunity__c)){
+                        Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
+                            if(String.isNotBlank(opptObject.Primary_Contact__r.Email)) {
+                                Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id ,  
+                                                                        emailTemplateMap.get('Send_Invoice_CL_Lightning_Follow_Up'), 
+                                                                        opptObject.Primary_Contact__c,
+                                                                        !opptObject.Primary_Contact__r.HasOptedOutOfEmail);
+                                //Masking
+                                emailMessage.setCcAddresses(new List<String>{'Support@synergyspecialistsfs.com'});
+                                singleEmailMsgLst.add(emailMessage);
+                             }
+                    }
+                }
             
+                Messaging.sendEmail(singleEmailMsgLst);
+                
+                //Done for creating activity
+                for(Opportunity_Line_Item__c lineItem : invoiceLstForApprovalFollowup) {
+                    Utility.synchActivity(lineItem.Id , lineItem.Opportunity__c );
+                }
+
+                Messaging.sendEmail(singleEmailMsgLst);
+                    
+                //Done for creating activity
+                for(Opportunity_Line_Item__c lineItem : oliLstToSendEmail) {
+                    Utility.synchActivity(lineItem.Id , lineItem.Opportunity__c );
+                }
+
+            }
+
+            if (!invoiceLstForPaymentDue.isEmpty()) {
+                singleEmailMsgLst = new List<Messaging.SingleEmailMessage>();
+                for(Opportunity_Line_Item__c lineItem : invoiceLstForPaymentDue){
+                    if(opportunityMap.containsKey(lineItem.Opportunity__c)){
+                        Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
+                            if(String.isNotBlank(opptObject.GP_Contact__r.Email)) {
+                                Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id ,  
+                                                                        emailTemplateMap.get('Invoice_Due_For_Payment_CL'), 
+                                                                        opptObject.GP_Contact__c,
+                                                                        !opptObject.GP_Contact__r.HasOptedOutOfEmail);
+                                
+                            
+                            //SetToAddress as GP Email and Practice OM Email
+                            List<String> toAddress = new List<String>();
+
+          
+                            //If GP Contact is not null and OM Email is not blank, then add 
+                            if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.OM_EMail__c)) {
+                                toAddress.add(opptObject.GP_Contact__r.OM_EMail__c);
+                                emailMessage.setToAddresses(toAddress);
+                            }
+                            
+                            //Masking
+                            emailMessage.setCcAddresses(new List<String>{'Support@synergyspecialistsfs.com'});
+                            singleEmailMsgLst.add(emailMessage);
+                        }
+                    }
+                }
+            
+                Messaging.sendEmail(singleEmailMsgLst);
+                    
+                //Done for creating activity
+                for(Opportunity_Line_Item__c lineItem : invoiceLstForPaymentDue) {
+                    Utility.synchActivity(lineItem.Id , lineItem.Opportunity__c );
+                }
+
+            }
+
+            if (!invoiceLstForPaymentDueFollowUp.isEmpty()) {
+                singleEmailMsgLst = new List<Messaging.SingleEmailMessage>();
+                for(Opportunity_Line_Item__c lineItem : invoiceLstForPaymentDueFollowUp){
+                    if(opportunityMap.containsKey(lineItem.Opportunity__c)){
+                        Opportunity opptObject = opportunityMap.get(lineItem.Opportunity__c);
+                            if(String.isNotBlank(opptObject.GP_Contact__r.Email)) {
+                                Messaging.SingleEmailMessage emailMessage = Utility.sendEmail(lineItem.Id ,  
+                                                                        emailTemplateMap.get('Invoice_Due_Follow_up_Payment_CL'), 
+                                                                        opptObject.GP_Contact__c,
+                                                                        !opptObject.GP_Contact__r.HasOptedOutOfEmail);
+                                
+                            
+                            //SetToAddress as GP Email and Practice OM Email
+                            List<String> toAddress = new List<String>();
+
+          
+                            //If GP Contact is not null and OM Email is not blank, then add 
+                            if(opptObject.GP_Contact__c != null && String.isNotBlank(opptObject.GP_Contact__r.OM_EMail__c)) {
+                                toAddress.add(opptObject.GP_Contact__r.OM_EMail__c);
+                                emailMessage.setToAddresses(toAddress);
+                            }
+                            
+                            //Masking
+                            emailMessage.setCcAddresses(new List<String>{'Support@synergyspecialistsfs.com'});
+                            singleEmailMsgLst.add(emailMessage);
+                        }
+                    }
+                }
+            
+                Messaging.sendEmail(singleEmailMsgLst);
+                    
+                //Done for creating activity
+                for(Opportunity_Line_Item__c lineItem : invoiceLstForPaymentDueFollowUp) {
+                    Utility.synchActivity(lineItem.Id , lineItem.Opportunity__c );
+                }
+            }
+
             isLogicExecuted = true;
         }
         
@@ -348,8 +527,8 @@ public with sharing class OpportunityLineItemTriggerHandler {
             }
 
             if(!opptyIdSet.isEmpty()){
-                Map<Id,Opportunity> opptyMap = new Map<Id,Opportunity>([SELECT Id,Name,Primary_Contact__r.Name,Disable_Auto_Emails__c,Disable_Auto_Emails_Provider__c,
-                        GP_Contact__r.Account.Name
+                Map<Id,Opportunity> opptyMap = new Map<Id,Opportunity>([SELECT Id,Name,Primary_Contact__r.Name,Prepay_On__c,Prepay_Fee__c,Disable_Auto_Emails__c,Disable_Auto_Emails_Provider__c,
+                        GP_Contact__r.Account.Name,PREPAY_NET_TERMS__c,Specialist_Fee__c
                 from Opportunity
                 where Id IN: opptyIdSet ]);
 
@@ -373,8 +552,15 @@ public with sharing class OpportunityLineItemTriggerHandler {
                             lineItemVar.Name = (!String.isBlank(opptyNameStr) && opptyNameStr.length() > 78 ) ? opptyNameStr.substring(0,78) : opptyNameStr ;
                         }
 
+                        lineItemVar.Prepay_On__c = opptyMap.get(lineItemVar.Opportunity__c).Prepay_On__c;
+                        lineItemVar.Specilaist_Fee_Actual__c = opptyMap.get(lineItemVar.Opportunity__c).Specialist_Fee__c;
+                        lineItemVar.Prepay_Fee__c = opptyMap.get(lineItemVar.Opportunity__c).Prepay_Fee__c;
                         lineItemVar.Disable_Auto_Emails__c = opptyMap.get(lineItemVar.Opportunity__c).Disable_Auto_Emails__c;
                         lineItemVar.Disable_Auto_Emails_Provider__c = opptyMap.get(lineItemVar.Opportunity__c).Disable_Auto_Emails_Provider__c;
+                        if(opptyMap.get(lineItemVar.Opportunity__c).PREPAY_NET_TERMS__c != null && lineItemVar.Treatment_Date__c != null ) {
+                            lineItemVar.Prepay_Due_Date__c = lineItemVar.Treatment_Date__c.addDays(-1 * Integer.valueOf(opptyMap.get(lineItemVar.Opportunity__c).PREPAY_NET_TERMS__c));
+                    
+                        }
                     }
                 }
 

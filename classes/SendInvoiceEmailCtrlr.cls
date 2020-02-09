@@ -90,7 +90,7 @@ public with sharing class SendInvoiceEmailCtrlr {
                     }
                     
                     try{
-                        opptyLineItem[0].Status__c = 'Invoice Sent to Provider';
+                        opptyLineItem[0].Status__c = 'Production Sent to Provider';
                         opptyLineItem[0].Invoice_Sent_for_Approval_Date__c = Date.today();
                         update opptyLineItem[0];
                         

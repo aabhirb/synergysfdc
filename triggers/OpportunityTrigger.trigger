@@ -4,6 +4,9 @@ trigger OpportunityTrigger on Opportunity (before insert, after insert, after up
         //Update invoice records for after insert trigger
         OpportunityTriggerHandler.updateInvoices(Trigger.new);
     } else if(trigger.isAfter && trigger.isUpdate){
+        //Ankita A: 23 Jan 2020: Update date/time fields when stage is updated	
+        OpportunityTriggerHandler.populateOppDatetimeFields(Trigger.oldMap, Trigger.new);
+        
         //Check if the ConciergeNeeded field is updated or not
         OpportunityTriggerHandler.isConciergeUpdated(Trigger.oldMap, Trigger.new);
         //Ankita A: 14 Nov Member Introduction: Citagenix Email changes

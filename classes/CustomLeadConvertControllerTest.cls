@@ -144,6 +144,95 @@ public with sharing class CustomLeadConvertControllerTest {
         Test.stopTest();
 
     }
+    
+    /*public static testMethod void convertLeadTestSP(){
+        
+        setUpData();
+        CustomLeadConvertController.convertLead( leadIdSP );
+        
+        
+        // leadIdGP Converted
+
+        List<Lead> leadLst = [SELECT Id,Name,ConvertedContactId from Lead where Id =: leadIdSP];
+        if(leadLst != null && !leadLst.isEmpty() ){
+            for( Lead lead : leadLst){
+                CustomLeadConvertController.calculateProspectMatches(lead.ConvertedContactId , null , 150 );
+                ProspectMatchMapViewCtrlr.getProspectMatches(lead.ConvertedContactId );
+                ProspectMatchMapViewCtrlr.recalculateProspectMatches( lead.Id , 50);
+                ProspectMatchMapViewCtrlr.getContactDetails(  lead.ConvertedContactId );              
+            }
+        }
+	
+        //ProspectMatchMapViewCtrlr.fakeMethod();
+
+        List<Id> matchIdLst = new List<Id> ();
+        for( Prospect_Match__c match : [SELECT id,name from Prospect_Match__c ]){
+            matchIdLst.add( match.id );
+        }
+        
+        
+        CustomLeadConvertController.AddressWrapper wrapper = new CustomLeadConvertController.AddressWrapper();
+        wrapper.street  = '2998 Milmont Drive';
+        wrapper.city = 'Milpitas';
+        wrapper.state = 'CA';
+        wrapper.zip = '96870';
+        wrapper.latVal  = '37.454320';
+        wrapper.longVal  = '-121.916920';
+        wrapper.addressType = 'Home Address';
+
+        List <CustomLeadConvertController.AddressWrapper> wrapperLst = new List <CustomLeadConvertController.AddressWrapper>{ wrapper };
+
+
+        wrapperLst[0].addressType = 'Entity Address';
+        CustomLeadConvertController.updateAddressOnLead(JSON.serialize(wrapperLst),leadIdSP);
+
+        wrapperLst[0].addressType = 'Practice Address';
+        CustomLeadConvertController.updateAddressOnLead(JSON.serialize(wrapperLst),leadIdSP);
+
+        wrapperLst[0].addressType = 'Non Compete Address';
+        CustomLeadConvertController.updateAddressOnLead(JSON.serialize(wrapperLst),leadIdSP);
+        
+        ShowProspectMatchesCtrlr ctrlr = new ShowProspectMatchesCtrlr();
+        Prospect_Match__c match = [Select id from Prospect_Match__c limit 1];
+        ctrlr.setMatchId(match.Id);
+        ctrlr.setMatchIdSP(match.Id); 
+        //CustomLeadConvertController.bumpTest();
+
+        for( Lead leadSObj : leadLst ){
+            if( leadSObj.Id == leadIdSP ){
+                leadSObj.Status = 'Initial';
+                update leadSObj;
+                break;
+            }
+        }
+        
+        Test.startTest();
+
+        CustomLeadConvertController.initiateEmailInvocation( leadIdSP , 'Endo;Perio' );
+        CustomLeadConvertController.loadLeadData( leadLst[0].Id );
+
+        List<Prospect_Match__c> matchLstToApprove = new List<Prospect_Match__c>();
+
+        for ( Prospect_Match__c matchToApprove : [Select id from Prospect_Match__c]){
+                matchToApprove.Match_Stage__c = 'Match Email Sent to SP';
+            matchLstToApprove.add( matchToApprove );
+        }
+
+        update matchLstToApprove;
+
+        matchLstToApprove = new List<Prospect_Match__c>();
+        for ( Prospect_Match__c matchToApprove : [Select id from Prospect_Match__c]){
+                matchToApprove.Match_Stage__c = 'Match Approved';
+                matchLstToApprove.add( matchToApprove );
+        }
+
+        update matchLstToApprove;
+
+
+
+        Test.stopTest();
+    } */
+    
     public static testMethod void ProspectMatchTest(){
         Account acctGP1 = new Account(Name='Test',RecordTypeId = Utility.getsObjectRecordTypeId(Account.SObjectType,'Practice'));
         insert acctGP1;
