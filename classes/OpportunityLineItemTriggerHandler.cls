@@ -527,10 +527,14 @@ public with sharing class OpportunityLineItemTriggerHandler {
             }
 
             if(!opptyIdSet.isEmpty()){
-                Map<Id,Opportunity> opptyMap = new Map<Id,Opportunity>([SELECT Id,Name,Primary_Contact__r.Name,Prepay_On__c,Prepay_Fee__c,Disable_Auto_Emails__c,Disable_Auto_Emails_Provider__c,
-                        GP_Contact__r.Account.Name,PREPAY_NET_TERMS__c,Specialist_Fee__c
-                from Opportunity
-                where Id IN: opptyIdSet ]);
+                Map<Id,Opportunity> opptyMap = new Map<Id,Opportunity>([
+                                                    SELECT Id,Name,Primary_Contact__r.Name,Prepay_On__c,Prepay_Fee__c,
+                                                            Disable_Auto_Emails__c,Disable_Auto_Emails_Provider__c,
+                                                            GP_Contact__r.Account.Name,PREPAY_NET_TERMS__c,Specialist_Fee__c,
+                                                            Synergy_Compensation__c,Practice_Developer_Contact__c,Practice_Developer_Comp__c
+                                                    FROM Opportunity
+                                                    WHERE
+                                                    Id IN: opptyIdSet ]);
 
                 for( Opportunity_Line_Item__c lineItemVar : newOLILst ){
                     if(opptyMap.containsKey(lineItemVar.Opportunity__c) && lineItemVar.Treatment_Date__c != null){
@@ -559,8 +563,10 @@ public with sharing class OpportunityLineItemTriggerHandler {
                         lineItemVar.Disable_Auto_Emails_Provider__c = opptyMap.get(lineItemVar.Opportunity__c).Disable_Auto_Emails_Provider__c;
                         if(opptyMap.get(lineItemVar.Opportunity__c).PREPAY_NET_TERMS__c != null && lineItemVar.Treatment_Date__c != null ) {
                             lineItemVar.Prepay_Due_Date__c = lineItemVar.Treatment_Date__c.addDays(-1 * Integer.valueOf(opptyMap.get(lineItemVar.Opportunity__c).PREPAY_NET_TERMS__c));
-                    
                         }
+                        lineItemVar.Synergy_Compensation__c = opptyMap.get(lineItemVar.Opportunity__c).Synergy_Compensation__c;
+                        lineItemVar.Practice_Developer__c = opptyMap.get(lineItemVar.Opportunity__c).Practice_Developer_Contact__c;
+                        lineItemVar.Practice_Developer_Comp__c = opptyMap.get(lineItemVar.Opportunity__c).Practice_Developer_Comp__c;
                     }
                 }
 

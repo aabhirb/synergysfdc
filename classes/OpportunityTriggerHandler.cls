@@ -230,7 +230,10 @@ public with sharing class OpportunityTriggerHandler {
         if(!lstOpportunity.isEmpty()){
             List<Opportunity_Line_Item__c> invoicesToUpdate = new List<Opportunity_Line_Item__c>();
             //Query all the invoice objects associated with these Opportunities
-            for(Opportunity_Line_Item__c invoice : [SELECT Id, Concierge_Needed__c,Treatment_Date__c,Opportunity__r.PREPAY_NET_TERMS__c,Opportunity__r.Prepay_Fee__c,Prepay_Fee__c,Prepay_On__c,
+            for(Opportunity_Line_Item__c invoice : [SELECT Id, Concierge_Needed__c,Treatment_Date__c,Opportunity__r.PREPAY_NET_TERMS__c,
+                                                            Opportunity__r.Prepay_Fee__c,Prepay_Fee__c,Prepay_On__c,
+                                                            Opportunity__r.Practice_Developer_Comp__c,Opportunity__r.Practice_Developer_Contact__c,
+
                                                             Opportunity__r.Prepay_On__c,Specilaist_Fee_Actual__c,Opportunity__r.Specialist_Fee__c
                                                         FROM Opportunity_Line_Item__c 
                                                         WHERE Opportunity__c IN: lstOpportunity AND Status__c = 'Scheduled'
@@ -242,7 +245,19 @@ public with sharing class OpportunityTriggerHandler {
                 
                 if (invoice.Prepay_Fee__c == null && invoice.Opportunity__r.Prepay_Fee__c != null) {
                     invoice.Prepay_Fee__c =  invoice.Opportunity__r.Prepay_Fee__c;
-                } 
+                }
+
+                if (invoice.Synergy_Compensation__c == null && invoice.Opportunity__r.Synergy_Compensation__c != null) {
+                    invoice.Synergy_Compensation__c = invoice.Opportunity__r.Synergy_Compensation__c;
+                }
+
+                if (invoice.Practice_Developer__c == null && invoice.Opportunity__r.Practice_Developer_Contact__c != null) {
+                    invoice.Practice_Developer__c =  invoice.Opportunity__r.Practice_Developer_Contact__c;
+                }
+
+                if (invoice.Practice_Developer_Comp__c == null && invoice.Opportunity__r.Practice_Developer_Comp__c != null) {
+                    invoice.Practice_Developer_Comp__c =  invoice.Opportunity__r.Practice_Developer_Comp__c;
+                }
 
                 if (invoice.Specilaist_Fee_Actual__c == null && invoice.Opportunity__r.Specialist_Fee__c != null) {
                     invoice.Specilaist_Fee_Actual__c = invoice.Opportunity__r.Specialist_Fee__c;

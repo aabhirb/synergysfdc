@@ -5,7 +5,8 @@
         <script>
             function show_alert(){
                 //Ankita A: Changed the message
-                var msg = "PDF saved and URL generated, Ready for sending for approval.";
+                var msg = "PDF saved and URL generated, Ready for sending for approval, " +
+                    "\n Pls refresh the screen if you want to see the updated file";
                 if(!alert(msg)) {
                     sforce.one.navigateToSObject('{!posId}');
                     //window.location.reload();
@@ -48,13 +49,20 @@
                             <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Balance Due</b></span></td>
                             <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><FONT COLOR="red" style="font-weight: bold;font-size: 15px;">${!opp.OD_Payment_Balance__c}</FONT></span> </td>
                         </tr>
-                        <apex:outputPanel rendered="{!opp.OD_Payment_Amount__c != 0 && opp.OD_Payment_Amount__c != null }">
+                        <apex:outputText rendered="{!opp.OD_Payment_Amount__c != 0 && opp.OD_Payment_Amount__c != null }">
                             <tr>
                                 <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Amount Paid</b></span></td>
                                 <td><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.OD_Payment_Amount__c}</span> </td>
                             </tr>
-                        </apex:outputPanel>
+                        </apex:outputText>
+                        <apex:outputText rendered="{!opp.Prepay_Balance__c != 0 && opp.Prepay_Balance__c != null}">
+                            <tr>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Pre-Pay Amount Due</b></span></td>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.Prepay_Balance__c}</span> </td>
+                            </tr>
+                        </apex:outputText>
                     </table>
+
                     <br/>
                     <div>
                         <table>
@@ -141,17 +149,24 @@
         <table style="height:100%;width:100%; position: relative; top: 200; bottom: 0; left: 0; right: 0;border:2px solid;border-collapse: collapse;" cellpadding="3">
             <tr style="border: 1px solid black;">
                 <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Date </span> </th>
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Day </span> </th>
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Amount </span> </th>
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> F.M.V </span> </th>
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Line Total or Per Diem </span> </th>
+                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Production Amount </span> </th>
+                <apex:outputText rendered="{!opp.Compensation__c != 0 && opp.Compensation__c != null}">
+                    <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Rate (F.M.V) </span> </th>
+                </apex:outputText>
+                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Gross Compensation </span> </th>
             </tr>
             <tr style="border: 1px solid black;">
                 <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} </span> </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 1</span>  </td>
                 <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Production_Amount__c} </span> </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Compensation__c} </span> </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> $<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!(opp.Production_Amount__c*opp.Compensation__c)/100}" /></apex:outputText> </span> </td>
+                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                        <apex:outputText
+                                rendered="{!opp.Compensation__c != 0 && opp.Compensation__c != null}"
+                                value="{0, number, ###,###,###,##0.00}">
+                                    <apex:param value="{!(opp.Compensation__c)/100}" />
+                        </apex:outputText>
+                    </span>
+                </td>
+                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.Production_Amount__c*opp.Compensation__c)/100}" /></apex:outputText> </span> </td>
             </tr>
         </table>
 
@@ -288,7 +303,11 @@
                         $({!ABS(opp.Implant_Cost__c)})
                     </span> 
                 </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Implant__c}% </span></td>
+                <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                        {!FLOOR(opp.Implant__c)}%
+                    </span>
+                </td>
                 <!-- <td style="border: 1px solid black;"> 
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
                         ${!opp.Provider_Contribution_Implant__c} 
@@ -316,7 +335,7 @@
                         $({!ABS(opp.Membrane_Cost__c)}) 
                     </span>
                 </td>
-                <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">{!opp.Membrane__c}%</span></td>
+                <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">{!FLOOR(opp.Membrane__c)}%</span></td>
                 <!-- <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">${!opp.Provider_Contribution_Membrane__c}</span></td> -->
                 <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
@@ -341,7 +360,7 @@
                         $({!ABS(opp.Healing_Abutment_Cost__c)})
                     </span>
                 </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Healing_Abutment__c}% </span></td> <!--  -->
+                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Healing_Abutment__c)}% </span></td> <!--  -->
                 <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_Healing_Abutment__c}</span></td> -->
                 <td style="border: 1px solid black;"> 
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
@@ -366,7 +385,7 @@
                         $({!ABS(opp.Bone_Graft_Cost__c)}) 
                     </span>
                 </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Bone_Graft__c}%</span></td>
+                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Bone_Graft__c)}%</span></td>
                 <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_for_Bone_Graft__c}</span></td> -->
                 <td style="border: 1px solid black;"> 
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
@@ -391,7 +410,7 @@
                         $({!ABS(opp.Assistant_Hourly_Rate__c)})
                     </span>
                 </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Practice_Assistant_Contribution__c}%</span></td>
+                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Practice_Assistant_Contribution__c)}%</span></td>
                 <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_Assistant__c}</span></td> -->
                 <td style="border: 1px solid black;"> 
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
@@ -487,16 +506,20 @@
                         $({!ABS(opp.Courtesy_Adjustment__c)})
                     </span>
                 </td>
-                <td style="border: 1px solid black;">{!opp.PR_Courtesy_Adjustment__c}</td>
+                <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                        {!FLOOR(opp.PR_Courtesy_Adjustment__c)}%
+                    </span>
+                </td>
                 <!-- <td style="border: 1px solid black;"></td> -->
                 <!-- <td style="border: 1px solid black;"></td> -->
                 <td style="border: 1px solid black;"> 
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
                         <apex:outputPanel rendered="{!opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c < 0}">
-                            $(<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Courtesy_Adjustment__c * opp.Courtesy_Adjustment__c)/100)}" /></apex:outputText>)
+                            (<apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Courtesy_Adjustment__c * opp.Courtesy_Adjustment__c)/100)}" /></apex:outputText>)
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c >= 0}">
-                            $<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!(opp.PR_Courtesy_Adjustment__c*opp.Courtesy_Adjustment__c)/100}" /></apex:outputText>
+                            <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.PR_Courtesy_Adjustment__c*opp.Courtesy_Adjustment__c)/100}" /></apex:outputText>
                         </apex:outputPanel>
                     </span> 
                 </td>
@@ -511,17 +534,21 @@
                         $({!ABS(opp.Insurance_Adjustment__c)})
                     </span>
                 </td>
-                <td style="border: 1px solid black;">{!opp.PR_Insurance_Adjustment__c}</td>
+                <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                    {!FLOOR(opp.PR_Insurance_Adjustment__c)}
+                    </span>
+                </td>
                 <!-- <td style="border: 1px solid black;"></td> -->
                 <!-- <td style="border: 1px solid black;"></td> -->
                 <td style="border: 1px solid black;"> 
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
                         <apex:outputPanel rendered="{!opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c < 0}">
-                            $(<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Insurance_Adjustment__c * opp.Insurance_Adjustment__c))/100}" /></apex:outputText>)
+                            (<apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Insurance_Adjustment__c * opp.Insurance_Adjustment__c))/100}" /></apex:outputText>)
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c >= 0}">
                             
-                            $<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!(opp.PR_Insurance_Adjustment__c*opp.Insurance_Adjustment__c)/100}" /></apex:outputText>
+                            <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.PR_Insurance_Adjustment__c*opp.Insurance_Adjustment__c)/100}" /></apex:outputText>
                         </apex:outputPanel>
                     </span> 
                 </td>
@@ -536,16 +563,20 @@
                         $({!ABS(opp.Write_off_Adjustment__c)})
                     </span>
                 </td>
-                <td style="border: 1px solid black;">{!opp.PR_Write_off_Adjustment__c}</td>
+                <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                        {!FLOOR(opp.PR_Write_off_Adjustment__c)}
+                    </span>
+                </td>
                 <!-- <td style="border: 1px solid black;"></td> -->
                 <!-- <td style="border: 1px solid black;"></td> -->
                 <td style="border: 1px solid black;"> 
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
                         <apex:outputPanel rendered="{!opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c < 0}">
-                            $(<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!ABS( (opp.PR_Write_off_Adjustment__c * opp.Write_off_Adjustment__c) / 100 )}" /></apex:outputText>)
+                            (<apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!ABS( (opp.PR_Write_off_Adjustment__c * opp.Write_off_Adjustment__c) / 100 )}" /></apex:outputText>)
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c >= 0}">
-                            $<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!(opp.PR_Write_off_Adjustment__c*opp.Write_off_Adjustment__c) / 100 }" /></apex:outputText>
+                            <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.PR_Write_off_Adjustment__c*opp.Write_off_Adjustment__c) / 100 }" /></apex:outputText>
                         </apex:outputPanel>
                     </span> 
                 </td>
@@ -560,17 +591,21 @@
                         $({!ABS(opp.Production_Adjustment__c)})
                     </span>
                 </td>
-                <td style="border: 1px solid black;">{!opp.PR_Production_Adjustment__c}</td>
+                <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                        {!FLOOR(opp.PR_Production_Adjustment__c)}
+                    </span>
+                </td>
                 <!-- <td style="border: 1px solid black;"></td> -->
                 <!-- <td style="border: 1px solid black;"></td> -->
                 <td style="border: 1px solid black;"> 
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
                         <apex:outputPanel rendered="{!opp.Production_Adjustment__c != null && opp.Production_Adjustment__c < 0}">
                             
-                            $(<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Production_Adjustment__c * opp.Production_Adjustment__c) /100)}" /></apex:outputText>)
+                            (<apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Production_Adjustment__c * opp.Production_Adjustment__c) /100)}" /></apex:outputText>)
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Production_Adjustment__c != null && opp.Production_Adjustment__c >= 0}">
-                            $<apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!(opp.PR_Production_Adjustment__c*opp.Production_Adjustment__c)/100}" /></apex:outputText>
+                            <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.PR_Production_Adjustment__c*opp.Production_Adjustment__c)/100}" /></apex:outputText>
                         </apex:outputPanel>
                     </span> 
                 </td>
@@ -582,11 +617,11 @@
         <table style="height:100%;width:100%; position: relative; top: 200; bottom: 0; left: 0; right: 0;border:2px solid;border-collapse: collapse;" cellpadding="3">
 
             <tr>
-                <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">Total Billed</span></b></td>
+                <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">Total Invoice</span></b></td>
                 <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.Invoice_Amount__c}</span></b></td>
             </tr>
 
-            <apex:outputPanel rendered="{!opp.OD_Payment_Amount__c != 0 && opp.OD_Payment_Amount__c != null }">
+            <apex:outputText rendered="{!opp.OD_Payment_Amount__c != 0 && opp.OD_Payment_Amount__c != null }">
                 <tr >
                 
                     <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">Amount Paid</span></b></td>
@@ -594,10 +629,10 @@
                 </tr>
 
                  <tr >
-                    <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">Amount Balance</span></b></td>
+                    <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">Invoice Balance</span></b></td>
                     <td style="border: 1px solid black;"><b><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.OD_Payment_Balance__c}</span></b></td>
                 </tr>
-            </apex:outputPanel>
+            </apex:outputText>
 
 
 
@@ -655,11 +690,27 @@
                  <div>
                      <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> * Reference DOS: {!opp.Treatment_Date_Formatted__c} on the check* </span> </b>
                  </div>
-                  <apex:outputPanel rendered="{!opp1.Special_Payment_Instructions__c != null}">
-                        <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;">* Special Payment Instructions : &nbsp; {!opp1.Special_Payment_Instructions__c} * </span> </b>
-                    </apex:outputPanel>
+
 
             </center>
+            <br/>
+            <div class="slds-grid">
+                <apex:outputPanel rendered="{!opp1.Special_Payment_Instructions__c != null}">
+                    <span>
+                        <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;">
+                                Payment Instructions :
+                            </span>
+                        </b>
+                    </span>
+                    <span>
+                        <b> <span style="font-family: Arial Unicode MS; font-size: 12pt;float: right;">
+                                &nbsp; {!opp1.Special_Payment_Instructions__c}
+                           </span>
+                        </b>
+                    </span>
+                </apex:outputPanel>
+            </div>
+
 
         </apex:outputPanel>
         <!-- Payment section -->

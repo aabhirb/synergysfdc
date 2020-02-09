@@ -63,7 +63,8 @@ public with sharing class opportunitylineintemExtensionsController {
                             Provider_Contribution_for_Bone_Graft__c,HA_Cost_Practice_Owes__c,HA_Cost_Owed_By_Practice__c,
                             Provider_Contribution_Healing_Abutment__c,Membrane_Cost_Practice_Owes__c,Membrane_Cost_Owed_By_Practice__c,Provider_Contribution_Membrane__c,
                             Total_Cost_Owed_By_Practice_Calc__c,Total_Cost_Practice_Owes_Calc__c,Invoice_Amount__c,Other_Cost_2__c,Other_Cost_3__c,Other_Description_2__c,Other_Description_3__c,Other_Description__c,OD_Payment_Balance__c,OD_Payment_Amount__c,Status__c,
-                            PR_Courtesy_Adjustment__c,Courtesy_Adjustment__c,PR_Insurance_Adjustment__c,Insurance_Adjustment__c,PR_Production_Adjustment__c,Production_Adjustment__c,PR_Write_off_Adjustment__c,Write_off_Adjustment__c
+                            PR_Courtesy_Adjustment__c,Courtesy_Adjustment__c,PR_Insurance_Adjustment__c,Insurance_Adjustment__c,PR_Production_Adjustment__c,Production_Adjustment__c,PR_Write_off_Adjustment__c,Write_off_Adjustment__c,
+                            Prepay_Balance__c
                             FROM
                             Opportunity_Line_Item__c
                             where
