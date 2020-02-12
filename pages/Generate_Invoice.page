@@ -19,15 +19,25 @@
 
 
         <!-- <apex:commandButton action="{!saveAttachement}" value="Save PDF" status="as" OnClick="show_alert()" /> -->
-
-
         <table style="height:100%;width:100%;">
             <tr>
                 <td style="width: 60%;">
                     <table>
-                        <!--<tr>
+                        <div style="float: left;">
+                            <apex:image url="{!$Resource.Synnergy_logo_FD}" width="130px" height="45px" />
+                        </div>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <br/>
+        <table style="height:100%;width:100%;">
+            <tr>
+                <td style="width: 70%;">
+                    <table>
+                       <!-- <tr>
 
-                            <td colspan="1"><apex:image url="{!$Resource.synergy_icon}" width="130px" height="35px" /></td>
+                            <td style="float: right;"><apex:image url="{!$Resource.Synnergy_logo_FD}" width="130px" height="45px" /></td>
                         </tr>
                         <br/>
                         <br/>-->
@@ -37,29 +47,38 @@
                         </tr>
 
                         <tr>
-                            <td> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Date Of Service</b> </span> </td>
+                            <td> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Treatment Date</b> </span> </td>
                             <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"> {!opp.Treatment_Date_Formatted__c} </span> </td>
                         </tr>
+
+                        <tr>
+                            <td> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Specialist Name</b> </span> </td>
+                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;">Dr.{!opp.Provider_Full_Name__c} </span> </td>
+                        </tr>
+
                         <tr>
                             <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Due Date</b> </span> </td>
                             <td > <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <FONT COLOR="red" style="font-weight: bold;font-size: 15px;">{!opp.Invoice_Due_Date_Formatted__c}</FONT> </span> </td>
                         </tr>
-                        <tr>
-                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Balance Due</b></span></td>
-                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><FONT COLOR="red" style="font-weight: bold;font-size: 15px;">${!opp.OD_Payment_Balance__c}</FONT></span> </td>
-                        </tr>
+
                         <apex:outputText rendered="{!opp.OD_Payment_Amount__c != 0 && opp.OD_Payment_Amount__c != null }">
                             <tr>
                                 <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Amount Paid</b></span></td>
                                 <td><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.OD_Payment_Amount__c}</span> </td>
                             </tr>
                         </apex:outputText>
+
                         <apex:outputText rendered="{!opp.Prepay_Balance__c != 0 && opp.Prepay_Balance__c != null}">
                             <tr>
                                 <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Pre-Pay Amount Due</b></span></td>
                                 <td><span style="font-family: Arial Unicode MS; font-size: 12pt;">${!opp.Prepay_Balance__c}</span> </td>
                             </tr>
                         </apex:outputText>
+
+                        <tr>
+                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><b>Balance Due</b></span></td>
+                            <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"><FONT COLOR="red" style="font-weight: bold;font-size: 15px;">${!opp.OD_Payment_Balance__c}</FONT></span> </td>
+                        </tr>
                     </table>
 
                     <br/>
@@ -283,7 +302,7 @@
 
         <table style="height:100%;width:100%; position: relative; top: 200; bottom: 0; left: 0; right: 0;border:2px solid;border-collapse: collapse;" cellpadding="4">
             <tr style="border: 1px solid black;">
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Description </span> </th>
+                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Reimbursements </span> </th>
                <!-- <th style="border: 1px solid black;">Cost/Unit</th>
                 <th style="border: 1px solid black;">Quantity</th>-->
                 <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Cost</span> </th>
@@ -645,7 +664,7 @@
                     <td style="width: 60%;">
                         <table>
                             <tr>
-                                <td > <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Check Payable To :</strong> </span> </td>
+                                <td > <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Address To :</strong> </span> </td>
                                 <td >
                                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
 
@@ -659,18 +678,6 @@
                                     </span>
                                 </td>
                             </tr>
-                            <tr>
-                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Mailing Address : </strong></span> </td>
-                                <td>
-                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp1.Primary_Contact__r.Formulated_MailingAddress__c} </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Reference Tx Date : </strong></span> </td>
-                                <td>
-                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} </span>
-                                </td>
-                            </tr>
                             <apex:outputText rendered="{!opp1.Special_Payment_Instructions__c != null}">
                                 <tr>
                                     <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Payment Instructions : </strong></span> </td>
@@ -679,6 +686,20 @@
                                     </td>
                                 </tr>
                             </apex:outputText>
+                            <tr>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Reference Tx Date : </strong></span> </td>
+                                <td>
+                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} {!opp.Practice_Name__c} </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Mailing Address : </strong></span> </td>
+                                <td>
+                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp1.Primary_Contact__r.Formulated_MailingAddress__c} </span>
+                                </td>
+                            </tr>
+
+
                         </table>
                     </td>
                 </tr>
@@ -710,7 +731,7 @@
                     <td style="width: 60%;">
                         <table>
                             <tr>
-                                <td > <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Check Payable To:</strong> </span> </td>
+                                <td > <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Address To:</strong> </span> </td>
                                 <td >
                                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                                          <apex:outputPanel rendered="{!opp1.Provider_Synergy_Plus__c}">
@@ -727,6 +748,22 @@
                                     </span>
                                 </td>
                             </tr>
+                            <apex:outputText rendered="{!opp1.Special_Payment_Instructions__c != null}">
+                                <tr>
+                                    <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Payment Instructions: </strong></span> </td>
+                                    <td>
+                                        <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp1.Special_Payment_Instructions__c} </span>
+                                    </td>
+                                </tr>
+                            </apex:outputText>
+
+                            <tr>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Reference Tx Date : </strong></span> </td>
+                                <td>
+                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} {!opp.Practice_Name__c}</span>
+                                </td>
+                            </tr>
+
                             <tr>
                                 <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Mailing Address : </strong></span> </td>
                                 <td>
@@ -740,20 +777,8 @@
                                     </span>
                                 </td>
                             </tr>
-                            <tr>
-                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Reference Tx Date : </strong></span> </td>
-                                <td>
-                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} </span>
-                                </td>
-                            </tr>
-                            <apex:outputText rendered="{!opp1.Special_Payment_Instructions__c != null}">
-                                <tr>
-                                    <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Payment Instructions: </strong></span> </td>
-                                    <td>
-                                        <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp1.Special_Payment_Instructions__c} </span>
-                                    </td>
-                                </tr>
-                            </apex:outputText>
+
+
                         </table>
                     </td>
                 </tr>
