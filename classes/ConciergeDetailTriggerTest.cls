@@ -68,7 +68,7 @@ public class ConciergeDetailTriggerTest {
             insert templates;
         //Insert smagicinteract__SMS_SenderId__c record
         smagicinteract__SMS_SenderId__c senderObject = new smagicinteract__SMS_SenderId__c(
-            smagicinteract__senderId__c = '19543888730',
+            smagicinteract__senderId__c = '13108072208',
             smagicinteract__Email_Notification_Template__c = 'default',
             smagicinteract__Used_For__c = 'Both'
         );

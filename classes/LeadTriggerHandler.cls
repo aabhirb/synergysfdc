@@ -22,7 +22,53 @@ public with sharing class LeadTriggerHandler {
 
 
     }
-
+	
+    //Ankita A: 10 Feb 2020: Populate date/time when status is changed
+    public static void populateDateTime(List<Lead> newLeadLst, Map<Id, Lead> oldMap){
+        List<Lead> leadToUpdate = new List<Lead>();
+       
+        for(Lead leadObject : [SELECT Id, Status, Intake_Sent_Datetime__c FROM Lead WHERE Id IN: newLeadLst]){
+            //If status is updated to Intake sent. update the date/time
+            if(leadObject.Status.equalsIgnoreCase('Intake Sent') && leadObject.Status != oldMap.get(leadObject.Id).Status){
+                leadObject.Intake_Sent_Datetime__c = System.now();
+				leadToUpdate.add(leadObject);
+            }
+        }
+        
+        update leadToUpdate;
+    }
+	
+    //Ankita A: 12 Feb 2020: Calculate Prospect Match for Lead when address, 
+    //specialty primary (Provider) and type of specialists GP needs ? (Practice) are updated.
+    public static void createProspectMatches(List<Lead> newLeadLst, Map<Id, Lead> oldMap){
+        
+        Set<Id> updatedLeads = new Set<Id>();
+        for(Lead leadObject : newLeadLst){
+            System.debug(leadObject.Address);
+            System.debug(leadObject.Street);
+            //If address is changed
+            if(leadObject.Street != oldMap.get(leadObject.Id).Street ||
+               leadObject.City != oldMap.get(leadObject.Id).City ||
+               leadObject.State != oldMap.get(leadObject.Id).State ||
+               leadObject.PostalCode != oldMap.get(leadObject.Id).PostalCode ||
+               leadObject.Country != oldMap.get(leadObject.Id).Country){
+                   updatedLeads.add(leadObject.Id);
+               }
+            //If Lead is of type Practice and Type of Specialists field is changed
+            if(leadObject.RecordTypeId == Utility.getsObjectRecordTypeId(Lead.getSobjectType(), 'Practice') &&
+              leadObject.Type_of_Specialists_they_want__c != oldMap.get(leadObject.Id).Type_of_Specialists_they_want__c){
+                  updatedLeads.add(leadObject.Id);
+              }
+            //If Lead is of type Provider and Primary specialty is changed
+            if(leadObject.RecordTypeId == Utility.getsObjectRecordTypeId(Lead.getSobjectType(), 'Provider') &&
+              leadObject.SPSPECIALTY__c != oldMap.get(leadObject.Id).SPSPECIALTY__c){
+                  updatedLeads.add(leadObject.Id);
+              }
+        }
+        if(updatedLeads.size() > 0){
+            CustomLeadConvertController.calculateProspectMatchesForLead(new List<Id>(updatedLeads), null);
+        }
+    } 
     public static void triggerIntakeFollowUp( List<Lead> leadLst , Map<Id,Lead> oldLeadMap ){
 
         Id spFollowUpTemplateId;
@@ -65,6 +111,47 @@ public with sharing class LeadTriggerHandler {
         if( !lstMsgsToSend.isEmpty() ){
 
             Messaging.sendEmail( lstMsgsToSend );
+        }
+
+        //Ankita A: 6 Feb 2020: Send Intake Sent SMS to Practice leads
+        ApexLogger.Logger logger = ApexLogger.createLogger('Synergy Lead SMS :'+System.now());
+        Map<Id, Lead> prLeadIntakeSent20Mins = new Map<Id, Lead>();
+        for(Lead leadObject : [SELECT Id, MobilePhone, Name, Send_Intake_SMS__c FROM Lead 
+                                    WHERE Id IN: leadLst AND MobilePhone != null AND smagicinteract__SMSOptOut__c = false]){
+            //If Send Intake SMS field is true and it's value has changed
+            if(leadObject.Send_Intake_SMS__c && leadObject.Send_Intake_SMS__c != oldLeadMap.get(leadObject.Id).Send_Intake_SMS__c){
+                logger.log('Sending SMS 20 min after intake sent to practice lead '+leadObject.Name);
+                prLeadIntakeSent20Mins.put(leadObject.Id, leadObject);
+            }
+        }
+        //If the prLeadIntakeSent map contains any elements
+        if(prLeadIntakeSent20Mins.size() > 0){
+            //Query the SMS template
+            List<smagicinteract__SMS_Template__c> smsTemplates = [SELECT Id, smagicinteract__Name__c, smagicinteract__Text__c 
+                                                                    FROM smagicinteract__SMS_Template__c
+                                                                    WHERE smagicinteract__Name__c IN ('Practice Intake Sent')
+                                                                ];
+            Map<String, smagicinteract__SMS_Template__c> nameToTemplateMap = new Map<String, smagicinteract__SMS_Template__c>();
+            for(smagicinteract__SMS_Template__c template : smsTemplates){
+                nameToTemplateMap.put(template.smagicinteract__Name__c, template);
+            }
+            Boolean isError = false;
+            try{
+                //Call utility method to send SMS
+                SendSMSUtility.sendIntakeSMS(prLeadIntakeSent20Mins, nameToTemplateMap.get('Practice Intake Sent'), null);
+            } catch(Exception e){
+                isError = true;
+                logger.logException(e);
+                System.debug('exception '+e.getStackTraceString());
+            }
+            //Check if errorLst has any records
+            List<String> errorLst = SendSMSUtility.errorLst;
+            if(errorLst.size() > 0){
+                isError = true;
+                logger.log(string.join(errorLst, ' \n'));
+            }
+            logger.setStatus(isError ? 'Error' : 'Success');
+            ApexLogger.commitLogs();
         }
     }
 
