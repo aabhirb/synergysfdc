@@ -390,6 +390,188 @@ public with sharing class CustomLeadConvertController {
 
             }
         }
+
+
+    }
+
+    //Ankita A: 12 Feb 2020: Added method to find Prospect Matches for Lead
+    public static void calculateProspectMatchesForLead(List<Id> leadIds, Integer mileRadius){
+
+        //Find existing SP Contact for GP Leads and GP Contact for SP Leads
+        List<Lead> leadLst = [SELECT Id, Name, RecordType.Name, RecordTypeId, Street, City, State, PostalCode, Address, Latitude, Longitude,
+                                Distance_Ready_To_Travel__c, Status, Type_of_Specialists_they_want__c, 
+                                SPSPECIALTY__c, SPSPECIALTY2__c
+                                FROM Lead WHERE Id IN: leadIds];
+        List<Id> gpLeads = new List<Id>();
+        List<Id> spLeads = new List<Id>();
+        List<Prospect_Match__c> prospectMatches = new List<Prospect_Match__c>();
+
+        for(Lead leadObject : leadLst){
+            String leadTypeStr = leadObject.RecordType.Name.equalsIgnoreCase('Practice') ? 'GP Lead' : 'SP Lead';
+            if(leadTypeStr.equalsIgnoreCase('GP Lead')){
+                gpLeads.add(leadObject.Id);
+            } else {
+                spLeads.add(leadObject.Id);
+            }
+        }
+
+        //Create mapping of GP Lead with List of SP Contact
+        Map<Id, List<Id>> mapGpLeadWithSPContacts = new Map<Id, List<Id>>();
+        for(Prospect_Match__c match : [SELECT Id, Name, SP_Contact__c, SP_Lead__c, GP_Lead__c from Prospect_Match__c where GP_Lead__c IN: gpLeads]){
+            if(mapGpLeadWithSPContacts.containsKey(match.GP_Lead__c)){
+                List<Id> spContactIds = mapGpLeadWithSPContacts.get(match.GP_Lead__c);
+                spContactIds.add(match.SP_Contact__c);
+                mapGpLeadWithSPContacts.put(match.GP_Lead__c, spContactIds);
+            } else {
+                mapGpLeadWithSPContacts.put(match.GP_Lead__c, new List<Id>{match.SP_Contact__c});
+            }
+        }
+
+        //Create mapping of SP Lead with List of Gp Contacts 
+        Map<Id, List<Id>> mapSpLeadWithGPContacts = new Map<Id, List<Id>>();
+        for(Prospect_Match__c match : [SELECT Id,Name,GP_Contact__c,SP_Lead__c,GP_Lead__c from Prospect_Match__c where SP_Lead__c IN: spLeads]){
+            if(mapSpLeadWithGPContacts.containsKey(match.SP_Lead__c)){
+                List<Id> gpContactIds = mapSpLeadWithGPContacts.get(match.SP_Lead__c);
+                gpContactIds.add(match.GP_Contact__c);
+                mapSpLeadWithGPContacts.put(match.SP_Lead__c, gpContactIds);
+            } else {
+                mapSpLeadWithGPContacts.put(match.SP_Lead__c, new List<Id>{match.GP_Contact__c});
+            }
+        }
+
+        for(Lead leadToSearch : leadLst){
+            Set<Id> SPContactIdSet = new Set <Id>();
+            Set<Id> GPContactIdSet = new Set <Id>();
+            System.debug('leadToSearch :=> '+leadToSearch);
+            String leadTypeStr = leadToSearch.RecordType.Name.equalsIgnoreCase('Practice') ? 'GP Lead' : 'SP Lead';
+            //If lead is of type Practice, then we need to find Contact of type Provider for Prospect Match
+            //If lead is of type Provider, then we need to find Contact of type Practice for Prospect Match
+            Id contactRecordTypeIdToSearch = (leadTypeStr.equalsIgnoreCase('GP Lead')) ? 
+                                            Utility.getsObjectRecordTypeId(Contact.SObjectType,'Provider') : 
+                                            Utility.getsObjectRecordTypeId(Contact.SObjectType,'Practice') ;
+            System.debug('contactRecordTypeIdToSearch :=> '+contactRecordTypeIdToSearch);
+
+            //Find existing Prospect matches for the given leadId
+            if(leadTypeStr.equalsIgnoreCase('GP Lead') && mapGpLeadWithSPContacts.containsKey(leadToSearch.Id)){
+                SPContactIdSet.addAll(mapGpLeadWithSPContacts.get(leadToSearch.Id));
+                
+            } else if(leadTypeStr.equalsIgnoreCase('SP Lead') && mapSpLeadWithGPContacts.containsKey(leadToSearch.Id)){
+                GPContactIdSet.addAll(mapSpLeadWithGPContacts.get(leadToSearch.Id));
+            }
+
+            if(leadToSearch.Latitude != null && leadToSearch.Longitude != null){
+                List<Contact> nearByContactLstFound = new List<Contact>();
+
+                if(leadTypeStr.equalsIgnoreCase('GP Lead')){
+                    mileRadius = (mileRadius != null) ? mileRadius : 120;
+                    // This will basically search for SPs with distance < 120 default
+                    nearByContactLstFound  = [SELECT Id, Name, AccountId, MailingLatitude, MailingLongitude, Contact_status__c, Account.Type_of_Specialist_Needed__c,SPSPECIALTY__c,SPSPECIALTY2__c
+                                                        from Contact
+                                                        where
+                                                        RecordTypeId =: contactRecordTypeIdToSearch
+                                                        and
+                                                        DISTANCE(MailingAddress,GEOLOCATION( :leadToSearch.Latitude , :leadToSearch.Longitude ) ,'mi') < :mileRadius
+                                                        ]; //Not used the condition Contact_status__c NOT IN : contactStatusesToExclude
+                } else {
+                    // This will basically search for GPs with distance < what SPs have defined in 
+                    //Distance_Ready_To_Travel__c
+
+                    String SPDistanceToTravel = leadToSearch.Distance_Ready_To_Travel__c;
+
+                    Integer higherOffset = 120;
+                    if(SPDistanceToTravel != null){
+
+                        if('Less than 10 miles'.equalsIgnoreCase(SPDistanceToTravel)){
+                            higherOffset = 10;
+                        }else if('Less than 20 miles'.equalsIgnoreCase(SPDistanceToTravel)){
+                            higherOffset = 20;
+                        }else if('Less than 30 miles'.equalsIgnoreCase(SPDistanceToTravel)){
+                            higherOffset = 30;
+                        }else if('Less than 40 miles'.equalsIgnoreCase(SPDistanceToTravel)){
+                            higherOffset = 40;
+                        }else if('Less than 50 miles'.equalsIgnoreCase(SPDistanceToTravel)){
+                            higherOffset = 50;
+                        }
+                    }
+
+                    higherOffset = (mileRadius != null) ? mileRadius : higherOffset;
+                    
+                    nearByContactLstFound  = [SELECT Id,Name,AccountId,MailingLatitude,MailingLongitude,Contact_status__c,Account.Type_of_Specialist_Needed__c,SPSPECIALTY__c,SPSPECIALTY2__c,Type_of_Specialists_GP_want__c
+                                                        from Contact
+                                                        where
+                                                        RecordTypeId =: contactRecordTypeIdToSearch
+                                                        and
+                                                        DISTANCE(MailingAddress,GEOLOCATION( :leadToSearch.Latitude , :leadToSearch.Longitude ) ,'mi') < :higherOffset
+                                                        ]; //Not used the condition Contact_status__c NOT IN : contactStatusesToExclude
+                                                        System.debug('nearByContactLstFound =>'+nearByContactLstFound);
+                }
+                System.debug('nearByContactLstFound =>'+nearByContactLstFound);
+
+                for(Contact contact : nearByContactLstFound){
+                    if(leadTypeStr.equalsIgnoreCase('GP Lead') ){
+                        if(!SPContactIdSet.contains(contact.Id)){
+                            if(leadToSearch.Latitude != null && leadToSearch.Longitude != null && contact.MailingLatitude != null && contact.MailingLongitude != null ){
+
+                                if(String.isNotBlank(leadToSearch.Type_of_Specialists_they_want__c) &&
+                                    (
+                                        (contact.SPSPECIALTY__c != null && String.valueOf(leadToSearch.Type_of_Specialists_they_want__c).containsIgnoreCase(contact.SPSPECIALTY__c))
+                                            ||
+                                        (contact.SPSPECIALTY2__c != null && String.valueOf(leadToSearch.Type_of_Specialists_they_want__c).containsIgnoreCase(contact.SPSPECIALTY2__c))
+                                    )
+
+                                ){
+                                    Location locationToSearch = Location.newInstance(leadToSearch.Latitude, leadToSearch.Longitude);
+                                    Location contactLocation  = Location.newInstance(contact.MailingLatitude, contact.MailingLongitude); 
+
+                                    prospectMatches.add(new Prospect_Match__c ( 
+                                            Match_Type__c = 'Lead', 
+                                            SP_Contact__c = contact.Id,
+                                            SP_Account__c = contact.AccountId, 
+                                            GP_Account__c = System.Label.Default_Account,
+                                            GP_Lead__c = leadToSearch.Id, 
+                                            Approximate_Distance__c = Location.getDistance(locationToSearch,contactLocation,'mi')
+                                            ));
+                                }
+
+                            }
+                        }
+
+                    }else {
+                        if(!GPContactIdSet.contains(contact.Id)) {
+                            if(leadToSearch.Latitude != null && leadToSearch.Longitude != null && contact.MailingLatitude != null && contact.MailingLongitude != null ){
+
+                                if(
+                                    (
+                                            contact.Type_of_Specialists_GP_want__c != null
+                                                    &&
+                                                    ( (leadToSearch.SPSPECIALTY__c != null && String.valueOf(contact.Type_of_Specialists_GP_want__c).containsIgnoreCase(leadToSearch.SPSPECIALTY__c))
+                                                            || ( leadToSearch.SPSPECIALTY2__c != null && String.valueOf(contact.Type_of_Specialists_GP_want__c).containsIgnoreCase(leadToSearch.SPSPECIALTY2__c) )
+                                                    )
+
+                                    )
+
+                                ){
+
+                                    Location locationToSearch = Location.newInstance(leadToSearch.Latitude, leadToSearch.Longitude);
+                                    Location contactLocation = Location.newInstance(contact.MailingLatitude, contact.MailingLongitude);
+                                    prospectMatches.add(new Prospect_Match__c ( 
+                                        Match_Type__c = 'Contact', 
+                                        GP_Account__c = (contact.AccountId != null) ? contact.AccountId : System.Label.Default_Account, 
+                                        GP_Contact__c = contact.Id, 
+                                        SP_Lead__c = leadToSearch.Id , 
+                                        SP_Contact__c = System.Label.Default_Contact,
+                                        Approximate_Distance__c = Location.getDistance(locationToSearch,contactLocation,'mi') ));
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        system.debug('prospectMatches ==>'+prospectMatches);
+        insert prospectMatches;
     }
 
     @AuraEnabled
@@ -451,10 +633,7 @@ public with sharing class CustomLeadConvertController {
 
                 LeadLst[0].Status = 'Intake Sent';
                 leadLst[0].Specialties_sent_for_intake__c = specialtiesSelected;
-                //Ankita A: Set the date/time value as well
-                LeadLst[0].Intake_Sent_Datetime__c = System.now();
-                update LeadLst;
-
+				update LeadLst;
                 String emailTemplateToFetch = '';
 
                 if ( LeadLst[0].RecordType.DeveloperName == 'Dental_Host_Office_HO_GP') {

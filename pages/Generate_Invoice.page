@@ -2,6 +2,12 @@
 
     <apex:form >
      <apex:includeLightning />
+         <table style="height:100%;width:100%; position: relative; top: 0; bottom: 200; left: 0; right: 0;border:0px solid">
+            <tr>
+                <td><apex:commandButton action="{!saveAttachement}" value="Save PDF" OnClick="show_alert()"/></td>
+            </tr>
+        </table>
+       
         <script>
             function show_alert(){
                 //Ankita A: Changed the message
@@ -46,7 +52,7 @@
                             <td bgcolor="#E0FFFF" ><span style="font-family: Arial Unicode MS; font-size: 12pt;"> {!opp.name} </span> </td>
                         </tr>
 
-                        <tr>
+                        <!--<tr>
                             <td> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Treatment Date</b> </span> </td>
                             <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"> {!opp.Treatment_Date_Formatted__c} </span> </td>
                         </tr>
@@ -54,7 +60,7 @@
                         <tr>
                             <td> <span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Specialist Name</b> </span> </td>
                             <td><span style="font-family: Arial Unicode MS; font-size: 12pt;">Dr.{!opp.Provider_Full_Name__c} </span> </td>
-                        </tr>
+                        </tr>-->
 
                         <tr>
                             <td><span style="font-family: Arial Unicode MS; font-size: 12pt;"> <b>Due Date</b> </span> </td>
@@ -177,8 +183,7 @@
                 <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} </span> </td>
                 <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Production_Amount__c} </span> </td>
                 <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;">
-                        <apex:outputText
-                                rendered="{!opp.Compensation__c != 0 && opp.Compensation__c != null}"
+                        <apex:outputText rendered="{!opp.Compensation__c != 0 && opp.Compensation__c != null}"
                                 value="{0, number, ###,###,###,##0.00}">
                                     <apex:param value="{!(opp.Compensation__c)/100}" />
                         </apex:outputText>
@@ -300,62 +305,68 @@
 
         </table> -->
 
-        <table style="height:100%;width:100%; position: relative; top: 200; bottom: 0; left: 0; right: 0;border:2px solid;border-collapse: collapse;" cellpadding="4">
-            <tr style="border: 1px solid black;">
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Reimbursements </span> </th>
-               <!-- <th style="border: 1px solid black;">Cost/Unit</th>
-                <th style="border: 1px solid black;">Quantity</th>-->
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Cost</span> </th>
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Responsibility (%) </span> </th>
-                <!--<th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;">Practice Contribution ($) </span> </th> -->
-                <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Line Total </span> </th>
-            </tr>
+        <apex:outputPanel rendered="{!(opp.Production_Adjustment__c != null && opp.Production_Adjustment__c != 0) || (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c != 0)
+                               || (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c != 0) || (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c != 0)
+                                  || (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c != 0) ||(opp.Other_Cost_2__c != null && opp.Other_Cost_2__c != 0)|| (opp.Other_Cost__c != null && opp.Other_Cost__c != 0)
+                                     || (opp.Assistant_Cost_Owed_By_Practice__c != null && opp.Assistant_Cost_Owed_By_Practice__c != 0) || (opp.Bone_Graft_Cost_Practice_Owes__c != null && opp.Bone_Graft_Cost_Practice_Owes__c != 0)
+                                        || (opp.HA_Cost_Owed_By_Practice__c != null && opp.HA_Cost_Owed_By_Practice__c != 0) || (opp.Membrane_Cost_Owed_By_Practice__c != null && opp.Membrane_Cost_Owed_By_Practice__c != 0) ||(opp.Implant_Cost_Owed_By_Practice__c != null && opp.Implant_Cost_Owed_By_Practice__c != 0 )}">
 
-            <tr style="{!IF((opp.Implant_Cost_Owed_By_Practice__c != null && opp.Implant_Cost_Owed_By_Practice__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Implant</span> </td>
-                <!--<td style="border: 1px solid black;">${!opp.Implant_Cost__c}</td>
-                <td style="border: 1px solid black;">{!opp.Implants_Used__c}</td>-->
-                <td style="{!IF(( (opp.Implant_Cost__c != null && opp.Implant_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Implant_Cost__c} </span> </td>
-                <td style="{!IF(!((opp.Implant_Cost__c != null && opp.Implant_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+            <table style="height:100%;width:100%; position: relative; top: 200; bottom: 0; left: 0; right: 0;border:2px solid;border-collapse: collapse;" cellpadding="4">
+                <tr style="border: 1px solid black;">
+                    <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Descriptions </span> </th>
+                    <!-- <th style="border: 1px solid black;">Cost/Unit</th>
+                     <th style="border: 1px solid black;">Quantity</th>-->
+                    <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Cost</span> </th>
+                    <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Responsibility (%) </span> </th>
+                    <!--<th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;">Practice Contribution ($) </span> </th> -->
+                    <th style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Line Total </span> </th>
+                </tr>
+
+                <tr style="{!IF((opp.Implant_Cost_Owed_By_Practice__c != null && opp.Implant_Cost_Owed_By_Practice__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Implant</span> </td>
+                    <!--<td style="border: 1px solid black;">${!opp.Implant_Cost__c}</td>
+                    <td style="border: 1px solid black;">{!opp.Implants_Used__c}</td>-->
+                    <td style="{!IF(( (opp.Implant_Cost__c != null && opp.Implant_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Implant_Cost__c} </span> </td>
+                    <td style="{!IF(!((opp.Implant_Cost__c != null && opp.Implant_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Implant_Cost__c)})
-                    </span> 
-                </td>
-                <td style="border: 1px solid black;">
+                    </span>
+                    </td>
+                    <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         {!FLOOR(opp.Implant__c)}%
                     </span>
-                </td>
-                <!-- <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
-                        ${!opp.Provider_Contribution_Implant__c} 
-                    </span> 
-                </td> -->
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <!-- <td style="border: 1px solid black;">
+                        <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                            ${!opp.Provider_Contribution_Implant__c}
+                        </span>
+                    </td> -->
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                     <apex:outputPanel rendered="{!opp.Implant_Cost_Owed_By_Practice__c != null && opp.Implant_Cost_Owed_By_Practice__c < 0}">
                         $({!ABS(opp.Implant_Cost_Owed_By_Practice__c)})
                     </apex:outputPanel>
                     <apex:outputPanel rendered="{!opp.Implant_Cost_Owed_By_Practice__c != null && opp.Implant_Cost_Owed_By_Practice__c >= 0}">
                         ${!opp.Implant_Cost_Owed_By_Practice__c}
                     </apex:outputPanel>
-                    </span> 
-                </td>
-                
-            </tr>
-
-            <tr style="{!IF((opp.Membrane_Cost_Owed_By_Practice__c != null && opp.Membrane_Cost_Owed_By_Practice__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">Membrane</span></td>
-               <!-- <td style="border: 1px solid black;">${!opp.Membrane_Cost__c}</td>
-                <td style="border: 1px solid black;">{!opp.Membrane_Used__c}</td>-->
-                <td style="{!IF((  (opp.Membrane_Cost__c != null && opp.Membrane_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"><span style="font-family: Arial Unicode MS; font-size: 10pt;">${!opp.Membrane_Cost__c}</span></td>
-                <td style="{!IF(!( (opp.Membrane_Cost__c != null && opp.Membrane_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}">
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
-                        $({!ABS(opp.Membrane_Cost__c)}) 
                     </span>
-                </td>
-                <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">{!FLOOR(opp.Membrane__c)}%</span></td>
-                <!-- <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">${!opp.Provider_Contribution_Membrane__c}</span></td> -->
-                <td style="border: 1px solid black;">
+                    </td>
+
+                </tr>
+
+                <tr style="{!IF((opp.Membrane_Cost_Owed_By_Practice__c != null && opp.Membrane_Cost_Owed_By_Practice__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">Membrane</span></td>
+                    <!-- <td style="border: 1px solid black;">${!opp.Membrane_Cost__c}</td>
+                     <td style="border: 1px solid black;">{!opp.Membrane_Used__c}</td>-->
+                    <td style="{!IF((  (opp.Membrane_Cost__c != null && opp.Membrane_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"><span style="font-family: Arial Unicode MS; font-size: 10pt;">${!opp.Membrane_Cost__c}</span></td>
+                    <td style="{!IF(!( (opp.Membrane_Cost__c != null && opp.Membrane_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                        $({!ABS(opp.Membrane_Cost__c)})
+                    </span>
+                    </td>
+                    <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">{!FLOOR(opp.Membrane__c)}%</span></td>
+                    <!-- <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">${!opp.Provider_Contribution_Membrane__c}</span></td> -->
+                    <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Membrane_Cost_Owed_By_Practice__c != null && opp.Membrane_Cost_Owed_By_Practice__c < 0}">
                             $({!ABS(opp.Membrane_Cost_Owed_By_Practice__c)})
@@ -364,23 +375,23 @@
                             ${!opp.Membrane_Cost_Owed_By_Practice__c}
                         </apex:outputPanel>
                     </span>
-                </td>
-                
-            </tr>
+                    </td>
 
-            <tr style="{!IF((opp.HA_Cost_Owed_By_Practice__c != null && opp.HA_Cost_Owed_By_Practice__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">Healing Abutment </span> </td>
+                </tr>
+
+                <tr style="{!IF((opp.HA_Cost_Owed_By_Practice__c != null && opp.HA_Cost_Owed_By_Practice__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">Healing Abutment </span> </td>
 
 
-                <td style="{!IF((  (opp.Healing_Abutment_Cost__c != null && opp.Healing_Abutment_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"><span style="font-family: Arial Unicode MS; font-size: 10pt;">${!opp.Healing_Abutment_Cost__c}</span></td>
-                <td style="{!IF(!( (opp.Healing_Abutment_Cost__c != null && opp.Healing_Abutment_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <td style="{!IF((  (opp.Healing_Abutment_Cost__c != null && opp.Healing_Abutment_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"><span style="font-family: Arial Unicode MS; font-size: 10pt;">${!opp.Healing_Abutment_Cost__c}</span></td>
+                    <td style="{!IF(!( (opp.Healing_Abutment_Cost__c != null && opp.Healing_Abutment_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Healing_Abutment_Cost__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Healing_Abutment__c)}% </span></td> <!--  -->
-                <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_Healing_Abutment__c}</span></td> -->
-                <td style="border: 1px solid black;"> 
+                    </td>
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Healing_Abutment__c)}% </span></td> <!--  -->
+                    <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_Healing_Abutment__c}</span></td> -->
+                    <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.HA_Cost_Owed_By_Practice__c != null && opp.HA_Cost_Owed_By_Practice__c < 0}">
                             $({!ABS(opp.HA_Cost_Owed_By_Practice__c)})
@@ -389,24 +400,24 @@
                             ${!opp.HA_Cost_Owed_By_Practice__c}
                         </apex:outputPanel>
                     </span>
-                </td>
-                
-            </tr>
+                    </td>
 
-            <tr style="{!IF((opp.Bone_Graft_Cost_Practice_Owes__c != null && opp.Bone_Graft_Cost_Practice_Owes__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Bone Graft</span></td>
-                <!--<td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Bone_Graft_Cost__c}</span></td>
-                <td style="border: 1px solid black;"> {!opp.Bone_Graft_Used__c}</td>-->
-                <td style="{!IF((  (opp.Bone_Graft_Cost__c != null && opp.Bone_Graft_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Bone_Graft_Cost__c} </span></td>
-                <td style="{!IF(!( (opp.Bone_Graft_Cost__c != null && opp.Bone_Graft_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
-                        $({!ABS(opp.Bone_Graft_Cost__c)}) 
+                </tr>
+
+                <tr style="{!IF((opp.Bone_Graft_Cost_Practice_Owes__c != null && opp.Bone_Graft_Cost_Practice_Owes__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Bone Graft</span></td>
+                    <!--<td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Bone_Graft_Cost__c}</span></td>
+                    <td style="border: 1px solid black;"> {!opp.Bone_Graft_Used__c}</td>-->
+                    <td style="{!IF((  (opp.Bone_Graft_Cost__c != null && opp.Bone_Graft_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Bone_Graft_Cost__c} </span></td>
+                    <td style="{!IF(!( (opp.Bone_Graft_Cost__c != null && opp.Bone_Graft_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
+                        $({!ABS(opp.Bone_Graft_Cost__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Bone_Graft__c)}%</span></td>
-                <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_for_Bone_Graft__c}</span></td> -->
-                <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Bone_Graft__c)}%</span></td>
+                    <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_for_Bone_Graft__c}</span></td> -->
+                    <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Bone_Graft_Cost_Practice_Owes__c != null && opp.Bone_Graft_Cost_Practice_Owes__c < 0}">
                             $({!ABS(opp.Bone_Graft_Cost_Practice_Owes__c)})
                         </apex:outputPanel>
@@ -414,24 +425,24 @@
                             ${!opp.Bone_Graft_Cost_Practice_Owes__c}
                         </apex:outputPanel>
                     </span>
-                </td>
-                
-            </tr>
+                    </td>
 
-            <tr style="{!IF((opp.Assistant_Cost_Owed_By_Practice__c != null && opp.Assistant_Cost_Owed_By_Practice__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Assistant </span> </td>
-                <!--<td style="border: 1px solid black;">${!opp.Assistant_Hourly_Rate__c} </span> </td>
-                <td style="border: 1px solid black;">{!opp.Assistant_Hours_Used__c}</td>-->
-                <td style="{!IF(( (opp.Assistant_Hourly_Rate__c != null && opp.Assistant_Hourly_Rate__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Assistant_Hourly_Rate__c} </span> </td>
-                <td style="{!IF(!((opp.Assistant_Hourly_Rate__c != null && opp.Assistant_Hourly_Rate__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                </tr>
+
+                <tr style="{!IF((opp.Assistant_Cost_Owed_By_Practice__c != null && opp.Assistant_Cost_Owed_By_Practice__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Assistant </span> </td>
+                    <!--<td style="border: 1px solid black;">${!opp.Assistant_Hourly_Rate__c} </span> </td>
+                    <td style="border: 1px solid black;">{!opp.Assistant_Hours_Used__c}</td>-->
+                    <td style="{!IF(( (opp.Assistant_Hourly_Rate__c != null && opp.Assistant_Hourly_Rate__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Assistant_Hourly_Rate__c} </span> </td>
+                    <td style="{!IF(!((opp.Assistant_Hourly_Rate__c != null && opp.Assistant_Hourly_Rate__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Assistant_Hourly_Rate__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Practice_Assistant_Contribution__c)}%</span></td>
-                <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_Assistant__c}</span></td> -->
-                <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!FLOOR(opp.Practice_Assistant_Contribution__c)}%</span></td>
+                    <!-- <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Provider_Contribution_Assistant__c}</span></td> -->
+                    <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Assistant_Cost_Owed_By_Practice__c != null && opp.Assistant_Cost_Owed_By_Practice__c < 0}">
                             $({!ABS(opp.Assistant_Cost_Owed_By_Practice__c)})
                         </apex:outputPanel>
@@ -439,24 +450,24 @@
                             ${!opp.Assistant_Cost_Owed_By_Practice__c}
                         </apex:outputPanel>
                     </span>
-                </td>
-                
-            </tr>
+                    </td>
 
-            <tr style="{!IF((opp.Other_Cost__c != null && opp.Other_Cost__c != 0)||(opp.Other_Cost__c != null && opp.Other_Cost__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Other_Description__c}</span></td>
-                
-                <td style="{!IF(( (opp.Other_Cost__c != null && opp.Other_Cost__c > 0 ) || (opp.Other_Cost__c != null && opp.Other_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Other_Cost__c}</span></td>
-                <td style="{!IF(!( (opp.Other_Cost__c != null && opp.Other_Cost__c > 0 ) || (opp.Other_Cost__c != null && opp.Other_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                </tr>
+
+                <tr style="{!IF((opp.Other_Cost__c != null && opp.Other_Cost__c != 0)||(opp.Other_Cost__c != null && opp.Other_Cost__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Other_Description__c}</span></td>
+
+                    <td style="{!IF(( (opp.Other_Cost__c != null && opp.Other_Cost__c > 0 ) || (opp.Other_Cost__c != null && opp.Other_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Other_Cost__c}</span></td>
+                    <td style="{!IF(!( (opp.Other_Cost__c != null && opp.Other_Cost__c > 0 ) || (opp.Other_Cost__c != null && opp.Other_Cost__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Other_Cost__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;"></td>
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <td style="border: 1px solid black;"></td>
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Other_Cost__c != null && opp.Other_Cost__c < 0}">
                             $({!ABS(opp.Other_Cost__c)})
                         </apex:outputPanel>
@@ -464,22 +475,22 @@
                             ${!opp.Other_Cost__c}
                         </apex:outputPanel>
                     </span>
-                </td>
-            </tr>
-            
-            <tr style="{!IF((opp.Other_Cost_2__c != null && opp.Other_Cost_2__c != 0)||(opp.Other_Cost_2__c != null && opp.Other_Cost_2__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">{!opp.Other_Description_2__c}</span></td>
-                
-                <td style="{!IF(( (opp.Other_Cost_2__c != null && opp.Other_Cost_2__c > 0 ) || (opp.Other_Cost_2__c != null && opp.Other_Cost_2__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Other_Cost_2__c}</span></td>
-                <td style="{!IF(!( (opp.Other_Cost_2__c != null && opp.Other_Cost_2__c > 0 ) || (opp.Other_Cost_2__c != null && opp.Other_Cost_2__c > 0 ) ),'border: 1px solid black;','display:none;')}">
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                </tr>
+
+                <tr style="{!IF((opp.Other_Cost_2__c != null && opp.Other_Cost_2__c != 0)||(opp.Other_Cost_2__c != null && opp.Other_Cost_2__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"><span style="font-family: Arial Unicode MS; font-size: 10pt;">{!opp.Other_Description_2__c}</span></td>
+
+                    <td style="{!IF(( (opp.Other_Cost_2__c != null && opp.Other_Cost_2__c > 0 ) || (opp.Other_Cost_2__c != null && opp.Other_Cost_2__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Other_Cost_2__c}</span></td>
+                    <td style="{!IF(!( (opp.Other_Cost_2__c != null && opp.Other_Cost_2__c > 0 ) || (opp.Other_Cost_2__c != null && opp.Other_Cost_2__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Other_Cost_2__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;"></td>
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <td style="border: 1px solid black;">
+                    </td>
+                    <td style="border: 1px solid black;"></td>
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Other_Cost_2__c != null && opp.Other_Cost_2__c < 0}">
                             $({!ABS(opp.Other_Cost_2__c)})
@@ -488,148 +499,151 @@
                             ${!opp.Other_Cost_2__c}
                         </apex:outputPanel>
                     </span>
-                </td>
-            </tr>
-            
-            <tr style="{!IF((opp.Other_Cost_3__c != null && opp.Other_Cost_3__c != 0)||(opp.Other_Cost_3__c != null && opp.Other_Cost_3__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Other_Description_3__c} </span></td>
-                
-                <td style="{!IF(( (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c > 0 ) || (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Other_Cost_3__c} </span></td>
-                <td style="{!IF(!( (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c > 0 ) || (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                </tr>
+
+                <tr style="{!IF((opp.Other_Cost_3__c != null && opp.Other_Cost_3__c != 0)||(opp.Other_Cost_3__c != null && opp.Other_Cost_3__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Other_Description_3__c} </span></td>
+
+                    <td style="{!IF(( (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c > 0 ) || (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Other_Cost_3__c} </span></td>
+                    <td style="{!IF(!( (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c > 0 ) || (opp.Other_Cost_3__c != null && opp.Other_Cost_3__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Other_Cost_3__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;"></td>
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <td style="border: 1px solid black;"></td>
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Other_Cost_3__c != null && opp.Other_Cost_3__c < 0}">
                             $({!ABS(opp.Other_Cost_3__c)})
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Other_Cost_3__c != null && opp.Other_Cost_3__c >= 0}">
                             ${!opp.Other_Cost_3__c}
                         </apex:outputPanel>
-                    </span> 
-                </td>
-            </tr>
+                    </span>
+                    </td>
+                </tr>
 
-            <tr style="{!IF((opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c != 0)||(opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Courtesy Adjustment(s) </span></td>
-                
-                <td style="{!IF(( (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c > 0 ) || (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Courtesy_Adjustment__c} </span></td>
-                <td style="{!IF(!( (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c > 0 ) || (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                <tr style="{!IF((opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c != 0)||(opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Courtesy Adjustment(s) </span></td>
+
+                    <td style="{!IF(( (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c > 0 ) || (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Courtesy_Adjustment__c} </span></td>
+                    <td style="{!IF(!( (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c > 0 ) || (opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Courtesy_Adjustment__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;">
+                    </td>
+                    <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         {!FLOOR(opp.PR_Courtesy_Adjustment__c)}%
                     </span>
-                </td>
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c < 0}">
                             (<apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Courtesy_Adjustment__c * opp.Courtesy_Adjustment__c)/100)}" /></apex:outputText>)
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Courtesy_Adjustment__c != null && opp.Courtesy_Adjustment__c >= 0}">
                             <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.PR_Courtesy_Adjustment__c*opp.Courtesy_Adjustment__c)/100}" /></apex:outputText>
                         </apex:outputPanel>
-                    </span> 
-                </td>
-            </tr>
+                    </span>
+                    </td>
+                </tr>
 
-            <tr style="{!IF((opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c != 0)||(opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Insurance Adjustment(s) </span></td>
-                
-                <td style="{!IF(( (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c > 0 ) || (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Insurance_Adjustment__c} </span></td>
-                <td style="{!IF(!( (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c > 0 ) || (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                <tr style="{!IF((opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c != 0)||(opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Insurance Adjustment(s) </span></td>
+
+                    <td style="{!IF(( (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c > 0 ) || (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Insurance_Adjustment__c} </span></td>
+                    <td style="{!IF(!( (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c > 0 ) || (opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Insurance_Adjustment__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;">
+                    </td>
+                    <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                     {!FLOOR(opp.PR_Insurance_Adjustment__c)}
                     </span>
-                </td>
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c < 0}">
                             (<apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Insurance_Adjustment__c * opp.Insurance_Adjustment__c))/100}" /></apex:outputText>)
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Insurance_Adjustment__c != null && opp.Insurance_Adjustment__c >= 0}">
-                            
+
                             <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.PR_Insurance_Adjustment__c*opp.Insurance_Adjustment__c)/100}" /></apex:outputText>
                         </apex:outputPanel>
-                    </span> 
-                </td>
-            </tr>
+                    </span>
+                    </td>
+                </tr>
 
-            <tr style="{!IF((opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c != 0)||(opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Write-Off Adjustment(s) </span></td>
-                
-                <td style="{!IF(( (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c > 0 ) || (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Write_off_Adjustment__c} </span></td>
-                <td style="{!IF(!( (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c > 0 ) || (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                <tr style="{!IF((opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c != 0)||(opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Write-Off Adjustment(s) </span></td>
+
+                    <td style="{!IF(( (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c > 0 ) || (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Write_off_Adjustment__c} </span></td>
+                    <td style="{!IF(!( (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c > 0 ) || (opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Write_off_Adjustment__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;">
+                    </td>
+                    <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         {!FLOOR(opp.PR_Write_off_Adjustment__c)}
                     </span>
-                </td>
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c < 0}">
                             (<apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!ABS( (opp.PR_Write_off_Adjustment__c * opp.Write_off_Adjustment__c) / 100 )}" /></apex:outputText>)
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Write_off_Adjustment__c != null && opp.Write_off_Adjustment__c >= 0}">
                             <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.PR_Write_off_Adjustment__c*opp.Write_off_Adjustment__c) / 100 }" /></apex:outputText>
                         </apex:outputPanel>
-                    </span> 
-                </td>
-            </tr>
+                    </span>
+                    </td>
+                </tr>
 
-            <tr style="{!IF((opp.Production_Adjustment__c != null && opp.Production_Adjustment__c != 0)||(opp.Production_Adjustment__c != null && opp.Production_Adjustment__c != 0),'border: 1px solid black;','display:none;')}">
-                <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Production Adjustment(s) </span></td>
-                
-                <td style="{!IF(( (opp.Production_Adjustment__c != null && opp.Production_Adjustment__c > 0 ) || (opp.Production_Adjustment__c != null && opp.Production_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Production_Adjustment__c} </span></td>
-                <td style="{!IF(!( (opp.Production_Adjustment__c != null && opp.Production_Adjustment__c > 0 ) || (opp.Production_Adjustment__c != null && opp.Production_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                <tr style="{!IF((opp.Production_Adjustment__c != null && opp.Production_Adjustment__c != 0)||(opp.Production_Adjustment__c != null && opp.Production_Adjustment__c != 0),'border: 1px solid black;','display:none;')}">
+                    <td style="border: 1px solid black;"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> Production Adjustment(s) </span></td>
+
+                    <td style="{!IF(( (opp.Production_Adjustment__c != null && opp.Production_Adjustment__c > 0 ) || (opp.Production_Adjustment__c != null && opp.Production_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}"> <span style="font-family: Arial Unicode MS; font-size: 10pt;"> ${!opp.Production_Adjustment__c} </span></td>
+                    <td style="{!IF(!( (opp.Production_Adjustment__c != null && opp.Production_Adjustment__c > 0 ) || (opp.Production_Adjustment__c != null && opp.Production_Adjustment__c > 0 ) ),'border: 1px solid black;','display:none;')}">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         $({!ABS(opp.Production_Adjustment__c)})
                     </span>
-                </td>
-                <td style="border: 1px solid black;">
+                    </td>
+                    <td style="border: 1px solid black;">
                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         {!FLOOR(opp.PR_Production_Adjustment__c)}
                     </span>
-                </td>
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <!-- <td style="border: 1px solid black;"></td> -->
-                <td style="border: 1px solid black;"> 
-                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> 
+                    </td>
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <!-- <td style="border: 1px solid black;"></td> -->
+                    <td style="border: 1px solid black;">
+                    <span style="font-family: Arial Unicode MS; font-size: 10pt;">
                         <apex:outputPanel rendered="{!opp.Production_Adjustment__c != null && opp.Production_Adjustment__c < 0}">
-                            
+
                             (<apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!ABS((opp.PR_Production_Adjustment__c * opp.Production_Adjustment__c) /100)}" /></apex:outputText>)
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!opp.Production_Adjustment__c != null && opp.Production_Adjustment__c >= 0}">
                             <apex:outputText value="{0, number, $###,###,###,##0.00}"><apex:param value="{!(opp.PR_Production_Adjustment__c*opp.Production_Adjustment__c)/100}" /></apex:outputText>
                         </apex:outputPanel>
-                    </span> 
-                </td>
-            </tr>
+                    </span>
+                    </td>
+                </tr>
 
-        </table>
+            </table>
+
+        </apex:outputPanel>
+
         <!-- Cost Table -->
         <br/>
         <table style="height:100%;width:100%; position: relative; top: 200; bottom: 0; left: 0; right: 0;border:2px solid;border-collapse: collapse;" cellpadding="3">
@@ -664,16 +678,21 @@
                     <td style="width: 60%;">
                         <table>
                             <tr>
-                                <td > <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Address To :</strong> </span> </td>
+                                <td > <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Payable To : </strong> </span> </td>
                                 <td >
                                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
-
-                                        <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name != null}">
-                                          {!opp1.Primary_Contact__r.Account.Name}
+                                        <apex:outputPanel rendered="{!!opp1.Payable_to_SCHML__c}">
+                                            <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name != null}">
+                                              {!opp1.Primary_Contact__r.Account.Name}
+                                            </apex:outputPanel>
+                                             <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name == null}">
+                                               {!opp1.Primary_Contact__r.firstname} {!opp1.Primary_Contact__r.lastname}
+                                            </apex:outputPanel> <strong>  NOT Synergy Specialists </strong>
                                         </apex:outputPanel>
-                                         <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name == null}">
-                                           {!opp1.Primary_Contact__r.firstname} {!opp1.Primary_Contact__r.lastname}
-                                        </apex:outputPanel> <strong>  NOT Synergy Specialists </strong>
+
+                                        <apex:outputPanel rendered="{!opp1.Payable_to_SCHML__c}">
+                                            Synergy Health Care Management, LP
+                                        </apex:outputPanel>
 
                                     </span>
                                 </td>
@@ -687,15 +706,20 @@
                                 </tr>
                             </apex:outputText>
                             <tr>
-                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Reference Tx Date : </strong></span> </td>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Reference : </strong></span> </td>
                                 <td>
-                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} {!opp.Practice_Name__c} </span>
+                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} - Dr.{!opp.Provider_Full_Name__c} </span>
                                 </td>
                             </tr>
                             <tr>
                                 <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Mailing Address : </strong></span> </td>
                                 <td>
-                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp1.Primary_Contact__r.Formulated_MailingAddress__c} </span>
+                                    <apex:outputPanel rendered="{!!opp1.Payable_to_SCHML__c}">
+                                        <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp1.Primary_Contact__r.Formulated_MailingAddress__c} </span>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!opp1.Payable_to_SCHML__c}">
+                                        530 East Los Angeles Ave # 115 - 363, Moorpark, CA 93021
+                                    </apex:outputPanel>
                                 </td>
                             </tr>
 
@@ -731,13 +755,19 @@
                     <td style="width: 60%;">
                         <table>
                             <tr>
-                                <td > <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Address To:</strong> </span> </td>
+
+                                <td > <span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Payable To : </strong> </span> </td>
                                 <td >
                                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
-                                         <apex:outputPanel rendered="{!opp1.Provider_Synergy_Plus__c}">
+                                         <apex:outputPanel rendered="{!AND(opp1.Provider_Synergy_Plus__c,!opp1.Payable_to_SCHML__c)}">
                                             Shervin Molayem Dental Corporation
                                          </apex:outputPanel>
-                                         <apex:outputPanel rendered="{!!opp1.Provider_Synergy_Plus__c}">
+
+                                        <apex:outputPanel rendered="{!opp1.Payable_to_SCHML__c}">
+                                            Synergy Health Care Management, LP
+                                        </apex:outputPanel>
+
+                                         <apex:outputPanel rendered="{!AND(!opp1.Provider_Synergy_Plus__c,!opp1.Payable_to_SCHML__c)}">
                                              <apex:outputPanel rendered="{!opp1.Primary_Contact__r.Account.Name != null}">
                                               {!opp1.Primary_Contact__r.Account.Name}
                                              </apex:outputPanel>
@@ -758,9 +788,9 @@
                             </apex:outputText>
 
                             <tr>
-                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Reference Tx Date : </strong></span> </td>
+                                <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Reference : </strong></span> </td>
                                 <td>
-                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} {!opp.Practice_Name__c}</span>
+                                    <span style="font-family: Arial Unicode MS; font-size: 10pt;"> {!opp.Treatment_Date_Formatted__c} - Dr.{!opp.Provider_Full_Name__c} </span>
                                 </td>
                             </tr>
 
@@ -768,11 +798,12 @@
                                 <td><span style="font-family: Arial Unicode MS; font-size: 10pt;"> <strong> Mailing Address : </strong></span> </td>
                                 <td>
                                     <span style="font-family: Arial Unicode MS; font-size: 10pt;">
-                                        <apex:outputPanel rendered="{!opp1.Provider_Synergy_Plus__c}">
+                                        <apex:outputPanel rendered="{!OR(opp1.Provider_Synergy_Plus__c,opp1.Payable_to_SCHML__c)}">
                                              530 East Los Angeles Ave # 115 - 363, Moorpark, CA 93021
                                         </apex:outputPanel>
                                         <apex:outputPanel rendered="{!!opp1.Provider_Synergy_Plus__c}">
-                                             Synergy Specialists c/o {!opp1.Primary_Contact__r.firstname} {!opp1.Primary_Contact__r.lastname} &nbsp; 530 East Los Angeles Ave # 115 - 363, Moorpark, CA 93021
+                                             Synergy Specialists c/o {!opp1.Primary_Contact__r.firstname} {!opp1.Primary_Contact__r.lastname} &nbsp;<br/>
+                                             530 East Los Angeles Ave # 115 - 363, Moorpark, CA 93021
                                         </apex:outputPanel>
                                     </span>
                                 </td>
@@ -838,10 +869,6 @@
 
         </apex:outputPanel>-->
         <!-- Payment section -->
-        <table style="height:100%;width:100%; position: relative; top: 200; bottom: 0; left: 0; right: 0;border:0px solid">
-            <tr>
-                <td><apex:commandButton action="{!saveAttachement}" value="Save PDF" OnClick="show_alert()"/></td>
-            </tr>
-        </table>
+       
     </apex:form>
 </apex:page>

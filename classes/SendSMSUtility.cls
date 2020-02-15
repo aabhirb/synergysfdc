@@ -1,7 +1,13 @@
 //Utility class to send sms using SMS magic
 public class SendSMSUtility {
     
+    public static final String SENDER_ID = '12133194239';
+    public static final String  INVOICE_SENDER_ID = '13108072208'; 
     public static String senderId;
+    //Ankita A: 10 Feb 2020: Sender Id for sms related to Invoice
+    public static String invoiceSMSSenderId; 
+    //Static error list
+    public static List<String> errorLst = new List<String>();
     public static void sendConciergeReservationSMS(List<Concierge_Details__c> conciergeDetailLst, smagicinteract__SMS_Template__c template){
         List <smagicinteract__smsmagic__c> smsObjectList = new List <smagicinteract__smsmagic__c>();
         List<Task> tasksToInsert = new List<Task>();
@@ -33,7 +39,9 @@ public class SendSMSUtility {
             
             //Get the senderId value from smagicinteract__senderId__c object if senderId is not set
             if(String.isBlank(senderId)){
-                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c LIMIT 1];
+                //Ankita A: 10 Feb 2020: Using senderId for Invoice sms
+                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c 
+                                                            WHERE smagicinteract__senderId__c =: INVOICE_SENDER_ID LIMIT 1];
                 senderId = senderObject != null ? senderObject.smagicinteract__senderId__c : '';
             }
             
@@ -64,7 +72,7 @@ public class SendSMSUtility {
                 invoiceToTaskMap.put(invoice.Id, taskObject);
             }
             //Handle error while insertion
-            List<String> errorLst = new List<String>();
+            List<String> conciergeErrorLst = new List<String>();
             List<Id> smsHistoryIds = new List<Id>(); 
             Database.SaveResult[] srList = Database.insert(smsObjectList, false);
             
@@ -74,7 +82,7 @@ public class SendSMSUtility {
                     smsHistoryIds.add(sr.getId());
                 } else {
                     for(Database.Error err : sr.getErrors()){
-                        errorLst.add(err.getMessage());
+                        conciergeErrorLst.add(err.getMessage());
                     }
                 }
             }
@@ -82,15 +90,15 @@ public class SendSMSUtility {
             //Query the Invoice Id from the SMS History object which was inserted successfully
             for(smagicinteract__smsmagic__c smsHistoryObj : [SELECT opportunity_line_item__c FROM smagicinteract__smsmagic__c
                                                              WHERE Id IN: smsHistoryIds]){
-                                                                 //Insert the tasks related to the invoice id
-                                                                 System.debug('smsHistoryObj  '+smsHistoryObj.opportunity_line_item__c);
-                                                                 tasksToInsert.add(invoiceToTaskMap.get(smsHistoryObj.opportunity_line_item__c));
-                                                             }
+                //Insert the tasks related to the invoice id
+                System.debug('smsHistoryObj  '+smsHistoryObj.opportunity_line_item__c);
+                tasksToInsert.add(invoiceToTaskMap.get(smsHistoryObj.opportunity_line_item__c));
+            }
             insert tasksToInsert;
             
             //Check if any sms history object was not inserted
-            if(errorLst.size() > 0){
-                throw new ConciergeDetailTriggerHandler.TriggerException('Error '+errorLst);
+            if(conciergeErrorLst.size() > 0){
+                throw new ConciergeDetailTriggerHandler.TriggerException('Error '+conciergeErrorLst);
             }
         }
         
@@ -105,7 +113,9 @@ public class SendSMSUtility {
             
             //Get the senderId value from smagicinteract__senderId__c object if senderId is not set
             if(String.isBlank(senderId)){
-                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c LIMIT 1];
+                //Ankita A: 10 Feb 2020: Below senderId will be used for intake SMS
+                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c WHERE 
+                                                            smagicinteract__senderId__c = :SENDER_ID];
                 senderId = senderObject != null ? senderObject.smagicinteract__senderId__c : '';
             }
             
@@ -114,7 +124,6 @@ public class SendSMSUtility {
         	Map<Id,Task> idToTaskMap = createTasks(mapSObject.values(), template, mapSObjectToText, 'Lead', isSP); 
             
             //Handle error while insertion
-            List<String> errorLst = new List<String>();
             List<Id> smsHistoryIds = new List<Id>(); 
             Database.SaveResult[] srList = Database.insert(smsObjectList, false);
 
@@ -138,11 +147,6 @@ public class SendSMSUtility {
                 tasksToInsert.add(idToTaskMap.get(smsHistoryObj.smagicinteract__Lead__c));
             }
             insert tasksToInsert;
-            
-            //Check if any sms history object was not inserted
-            if(errorLst.size() > 0){
-                throw new ConciergeDetailTriggerHandler.TriggerException('Error '+errorLst);
-            }
         }
     }
     
@@ -155,7 +159,9 @@ public class SendSMSUtility {
             
             //Get the senderId value from smagicinteract__senderId__c object if senderId is not set
             if(String.isBlank(senderId)){
-                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c LIMIT 1];
+                //Ankita A: Below senderid will be used for opt in sms
+                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c WHERE 
+                                                                    smagicinteract__senderId__c = :SENDER_ID];
                 senderId = senderObject != null ? senderObject.smagicinteract__senderId__c : '';
             }
             
@@ -164,7 +170,6 @@ public class SendSMSUtility {
         	Map<Id,Task> idToTaskMap = createTasks(mapSObject.values(), template, mapSObjectToText, 'Prospect_Match__c', isSP); 
             
             //Handle error while insertion
-            List<String> errorLst = new List<String>();
             List<Id> smsHistoryIds = new List<Id>(); 
             Database.SaveResult[] srList = Database.insert(smsObjectList, false);
 
@@ -178,6 +183,7 @@ public class SendSMSUtility {
                     }
                 }
             }
+            System.debug('smsHistoryIds ' +smsHistoryIds);
             
             List<Task> tasksToInsert = new List<Task>();
             //Query the Invoice Id from the SMS History object which was inserted successfully
@@ -187,10 +193,6 @@ public class SendSMSUtility {
             }
             insert tasksToInsert;
             
-            //Check if any sms history object was not inserted
-            if(errorLst.size() > 0){
-                throw new ConciergeDetailTriggerHandler.TriggerException('Error '+errorLst);
-            }
         }
     }
     
@@ -203,7 +205,9 @@ public class SendSMSUtility {
             
             //Get the senderId value from smagicinteract__senderId__c object if senderId is not set
             if(String.isBlank(senderId)){
-                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c LIMIT 1];
+                //Ankita A: 10 Feb 2020: Below senderid will be used for followup sms 
+                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c WHERE 
+                                                                    smagicinteract__senderId__c = :SENDER_ID];
                 senderId = senderObject != null ? senderObject.smagicinteract__senderId__c : '';
             }
             
@@ -212,7 +216,6 @@ public class SendSMSUtility {
         	Map<Id,Task> idToTaskMap = createTasks(mapSObject.values(), template, mapSObjectToText, 'Opportunity', isSP); 
             
             //Handle error while insertion
-            List<String> errorLst = new List<String>();
             List<Id> smsHistoryIds = new List<Id>(); 
             Database.SaveResult[] srList = Database.insert(smsObjectList, false);
 
@@ -235,10 +238,50 @@ public class SendSMSUtility {
             }
             insert tasksToInsert;
             
-            //Check if any sms history object was not inserted
-            if(errorLst.size() > 0){
-                throw new ConciergeDetailTriggerHandler.TriggerException('Error '+errorLst);
+        }
+    }
+    
+    public static void sendInvoiceSMS(Map<Id, SObject> mapSObject, smagicinteract__SMS_Template__c template, Boolean isSP){
+        List<Id> recordIds = new List<Id>(mapSObject.keySet());
+                
+        //Call the method to resolve the merge fields of template only if record Ids is not null and template is not null
+        if(!recordIds.isEmpty() && template != null){
+            Map<Id, String> mapSObjectToText = resolveTemplate(recordIds, template);
+            
+            //Get the senderId value from smagicinteract__senderId__c object if senderId is not set
+            if(String.isBlank(invoiceSMSSenderId)){
+                //Ankita A: 10 Feb 2020: Different senderId will be used for Invoice sms
+                smagicinteract__SMS_SenderId__c senderObject = [SELECT Id, smagicinteract__senderId__c FROM smagicinteract__SMS_SenderId__c WHERE 
+                                                               smagicinteract__senderId__c =: INVOICE_SENDER_ID ];
+                invoiceSMSSenderId = senderObject != null ? senderObject.smagicinteract__senderId__c : '';
             }
+            
+            //Create sms object 
+            List <smagicinteract__smsmagic__c> smsObjectList = createSMSObject(mapSObject.values(), mapSObjectToText, 'Invoice', isSP);
+        	Map<Id,Task> idToTaskMap = createTasks(mapSObject.values(), template, mapSObjectToText, 'Invoice', isSP); 
+            
+            //Handle error while insertion
+            List<Id> smsHistoryIds = new List<Id>(); 
+            Database.SaveResult[] srList = Database.insert(smsObjectList, false);
+
+            for(Database.SaveResult sr : srList){
+                if(sr.isSuccess()){
+                    //Store the Id of the SMS history object which was inserted successfully
+                    smsHistoryIds.add(sr.getId());
+                } else {
+                    for(Database.Error err : sr.getErrors()){
+                        errorLst.add(err.getMessage());
+                    }
+                }
+            }
+            
+            List<Task> tasksToInsert = new List<Task>();
+            //Query the Invoice Id from the SMS History object which was inserted successfully
+            for(smagicinteract__smsmagic__c smsHistoryObj : [SELECT opportunity_line_item__c FROM smagicinteract__smsmagic__c WHERE Id IN: smsHistoryIds]){
+                //Insert the tasks
+                tasksToInsert.add(idToTaskMap.get(smsHistoryObj.opportunity_line_item__c));
+            }
+            insert tasksToInsert;
         }
     }
     
@@ -280,39 +323,39 @@ public class SendSMSUtility {
     }
     
     private static smagicinteract__smsMagic__c setObjectSpecificInfo(smagicinteract__smsMagic__c smsObject, SObject sObjectRec, String sObjectName, Boolean isSP){
-       //Get the object name from the sObjectRec
+    //Get the object name from the sObjectRec
         if(sObjectName.equalsIgnoreCase('Lead')){
-            smsObject.smagicinteract__PhoneNumber__c = sObjectRec.get('MobilePhone').toString();
-            smsObject.smagicinteract__Name__c = sObjectRec.get('Name').toString();    
+            smsObject.smagicinteract__PhoneNumber__c = toString(sObjectRec.get('MobilePhone'));
+            smsObject.smagicinteract__Name__c = toString(sObjectRec.get('Name'));    
             smsObject.smagicinteract__Lead__c = sObjectRec.Id;
             
         } else if(sObjectName.equalsIgnoreCase('Contact')){
-            smsObject.smagicinteract__PhoneNumber__c = sObjectRec.get('MobilePhone').toString();
-            smsObject.smagicinteract__Name__c = sObjectRec.get('Name').toString();    
+            smsObject.smagicinteract__PhoneNumber__c = toString(sObjectRec.get('MobilePhone'));
+            smsObject.smagicinteract__Name__c = toString(sObjectRec.get('Name'));    
             smsObject.smagicinteract__Contact__c = sObjectRec.Id;
             
         }else if(sObjectName.equalsIgnoreCase('Opportunity')){
-            smsObject.smagicinteract__PhoneNumber__c = isSP ? sObjectRec.getSObject('Primary_Contact__r').get('MobilePhone').toString() :
-            												sObjectRec.getSObject('GP_Contact__r').get('MobilePhone').toString();
+            smsObject.smagicinteract__PhoneNumber__c = isSP ? toString(sObjectRec.getSObject('Primary_Contact__r').get('MobilePhone')) :
+                                                            toString(sObjectRec.getSObject('GP_Contact__r').get('MobilePhone'));
             
-            smsObject.smagicinteract__Name__c = isSP ? sObjectRec.getSObject('Primary_Contact__r').get('Name').toString() :
-            										sObjectRec.getSObject('GP_Contact__r').get('Name').toString();
+            smsObject.smagicinteract__Name__c = isSP ? toString(sObjectRec.getSObject('Primary_Contact__r').get('Name')) :
+                                                    toString(sObjectRec.getSObject('GP_Contact__r').get('Name'));
             smsObject.smagicinteract__Opportunity__c = sObjectRec.Id;
             
         } else if(sObjectName.equalsIgnoreCase('Prospect_Match__c')){
-            smsObject.smagicinteract__PhoneNumber__c = isSP ? sObjectRec.getSObject('SP_Contact__r').get('MobilePhone').toString() :
-            												sObjectRec.getSObject('GP_Contact__r').get('MobilePhone').toString();
+            smsObject.smagicinteract__PhoneNumber__c = isSP ? toString(sObjectRec.getSObject('SP_Contact__r').get('MobilePhone')) :
+                                                            toString(sObjectRec.getSObject('GP_Contact__r').get('MobilePhone'));
             
-            smsObject.smagicinteract__Name__c = isSP ? sObjectRec.getSObject('SP_Contact__r').get('Name').toString() :
-            										sObjectRec.getSObject('GP_Contact__r').get('Name').toString();
+            smsObject.smagicinteract__Name__c = isSP ? toString(sObjectRec.getSObject('SP_Contact__r').get('Name')) :
+                                                    toString(sObjectRec.getSObject('GP_Contact__r').get('Name'));
             smsObject.prospect_match__c = sObjectRec.Id;
             
-        }else if(sObjectName.equalsIgnoreCase('opportunity_line_item__c') && isSP){
-            smsObject.smagicinteract__PhoneNumber__c = isSP ? sObjectRec.getSObject('Opportunity__r').getSObject('Primary_Contact__r').get('MobilePhone').toString() :
-            												sObjectRec.getSObject('Opportunity__r').getSObject('GP_Contact__r').get('MobilePhone').toString();
+        } else if(sObjectName.equalsIgnoreCase('opportunity_line_item__c') && isSP){
+            smsObject.smagicinteract__PhoneNumber__c = isSP ? toString(sObjectRec.getSObject('Opportunity__r').getSObject('Primary_Contact__r').get('MobilePhone')) :
+                                                            toString(sObjectRec.getSObject('Opportunity__r').getSObject('GP_Contact__r').get('MobilePhone'));
             
-            smsObject.smagicinteract__Name__c = isSP ? sObjectRec.getSObject('Opportunity__r').getSObject('Primary_Contact__r').get('Name').toString() :
-            										sObjectRec.getSObject('Opportunity__r').getSObject('GP_Contact__r').get('Name').toString();
+            smsObject.smagicinteract__Name__c = isSP ? toString(sObjectRec.getSObject('Opportunity__r').getSObject('Primary_Contact__r').get('Name')) :
+                                                    toString(sObjectRec.getSObject('Opportunity__r').getSObject('GP_Contact__r').get('Name'));
             
             smsObject.opportunity_line_item__c = sObjectRec.Id;
 
@@ -352,6 +395,10 @@ public class SendSMSUtility {
             idToTaskMap.put(sObjectRec.Id, taskObject);
         }
         return idToTaskMap;
+    }
+
+    private static String toString(Object value){
+        return value != null ? value.toString() : '';
     }
     
 }

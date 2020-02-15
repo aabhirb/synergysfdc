@@ -64,7 +64,7 @@ public with sharing class opportunitylineintemExtensionsController {
                             Provider_Contribution_Healing_Abutment__c,Membrane_Cost_Practice_Owes__c,Membrane_Cost_Owed_By_Practice__c,Provider_Contribution_Membrane__c,
                             Total_Cost_Owed_By_Practice_Calc__c,Total_Cost_Practice_Owes_Calc__c,Invoice_Amount__c,Other_Cost_2__c,Other_Cost_3__c,Other_Description_2__c,Other_Description_3__c,Other_Description__c,OD_Payment_Balance__c,OD_Payment_Amount__c,Status__c,
                             PR_Courtesy_Adjustment__c,Courtesy_Adjustment__c,PR_Insurance_Adjustment__c,Insurance_Adjustment__c,PR_Production_Adjustment__c,Production_Adjustment__c,PR_Write_off_Adjustment__c,Write_off_Adjustment__c,
-                            Prepay_Balance__c,Provider_Full_Name__c,Practice_Name__c
+                            Prepay_Balance__c,Provider_Full_Name__c,Practice_Name__c,Opportunity__r.Payable_to_SCHML__c
                             FROM
                             Opportunity_Line_Item__c
                             where
@@ -116,7 +116,7 @@ public with sharing class opportunitylineintemExtensionsController {
         Public Opportunity getopp1(){
         oli = [SELECT Id,Opportunity__c,Total_Supply_Invoice_Amount__c,Total_Bottom_Line_Amount__c, Name,Invoice_Due_Date__c,Production_Amount__c,Compensation__c,Gross_Production_Amount__c,Total_Top_Line_Percentage__c,Treatment_Date__c,Treatment_Date_Formatted__c,Provider_Synergy_Plus__c,Total_Cost_for_Provider__c,Provider_Healing_Abutment__c,Membrane_Cost_for_Provider__c,Bone_Graft_Cost_for_Provider__c,Implant_Cost_for_Provider__c,Total_Cost_Owed_By_Practice__c,Total_Cost_Practice_Owes__c,Implant_Cost_Practice_Owes__c,Implant_Cost_Owed_By_Practice__c,Provider_Contribution_Implant__c,Invoice_Amount__c,Other_Cost_2__c,Other_Cost_3__c,Other_Description_2__c,Other_Description_3__c,Other_Description__c,OD_Payment_Balance__c,OD_Payment_Amount__c,Status__c,Courtesy_Adjustment__c,Insurance_Adjustment__c,Production_Adjustment__c,Write_off_Adjustment__c FROM Opportunity_Line_Item__c where id=:posId];
 
-            opp1 = [SELECT Id,GP_Contact__r.MailingCity , GP_Contact__r.MailingState, GP_Contact__r.MailingCountry,Primary_Contact__r.Account.Name, GP_Contact__r.MailingPostalCode,GP_Contact__r.Formulated_MailingAddress__c,Primary_Contact__r.Formulated_MailingAddress__c, GP_Contact__r.MailingStreet, Name,Primary_Contact__r.firstname,Primary_Contact__r.lastname,GP_Contact__r.firstname,GP_Contact__r.lastname,GP_Contact__r.Account.Name,GP_Contact__r.MobilePhone,Primary_Contact__r.MobilePhone,Provider_Synergy_Plus__c,Cheques_go_to_Synergy__c, Special_Payment_Instructions__c FROM Opportunity where id=:oli.Opportunity__c];
+            opp1 = [SELECT Id,GP_Contact__r.MailingCity , GP_Contact__r.MailingState, GP_Contact__r.MailingCountry,Primary_Contact__r.Account.Name, GP_Contact__r.MailingPostalCode,GP_Contact__r.Formulated_MailingAddress__c,Primary_Contact__r.Formulated_MailingAddress__c, GP_Contact__r.MailingStreet, Name,Primary_Contact__r.firstname,Primary_Contact__r.lastname,GP_Contact__r.firstname,GP_Contact__r.lastname,GP_Contact__r.Account.Name,GP_Contact__r.MobilePhone,Primary_Contact__r.MobilePhone,Provider_Synergy_Plus__c,Cheques_go_to_Synergy__c, Special_Payment_Instructions__c, Payable_to_SCHML__c FROM Opportunity where id=:oli.Opportunity__c];
             return opp1;
         }
         
