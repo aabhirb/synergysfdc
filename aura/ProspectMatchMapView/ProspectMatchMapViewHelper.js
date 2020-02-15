@@ -72,7 +72,13 @@
             var actions = [
                              { label: 'Start Match/Opt-in', name: 'nextaction'+processTypeVal  },
                 			 { label: 'View Match', name: 'viewMatch'},
-                			 { label: 'Queue Match', name: 'queueMatch' }
+                			 { label: 'Queue Match', name: 'queueMatch' },
+                
+                			//Name: Albina
+                			//Date: 2/8/2020
+                			//Description:added label 'Prospect' name
+                			{ label: 'Prospect', name: 'prospect'}
+                
                           ];
 
 
@@ -424,6 +430,37 @@
              childCmp.fireToastEventAction( 'error' , ("Error during Update :"+error) );
 
           });
+    },
+    //Name: Albina
+    //Date: 2/8/2020
+    //Description: added the fourth option: enProspect
+    enProspect : function( component , event , helper , dataToUpdate , actionTypeJS  ){
+          
+          var childCmp = component.find('LightningUtil-ProspectMatchMapView');
+          var action   = component.get("c.enProspect");
+          action.setParams({
+                              prospectMatchIdLst : dataToUpdate ,
+                              actionType         : actionTypeJS
+                           });
+
+        var dataPromise = childCmp.invokeServerAction( action , 'action' );
+
+        dataPromise.then($A.getCallback(function (data) {
+           console.log('Got results ',JSON.stringify(data));
+
+           if(data){
+                childCmp.fireToastEventAction( 'success' , "Prospect process initiated successfully" );
+                window.location.reload();
+           }
+
+
+        })).catch(function(error){
+
+           console.log('Error =>',error);
+           childCmp.fireToastEventAction( 'error' , ("Error during Update :"+error) );
+
+        });
+
     },
     processFilterCheckBoxes : function(component, event, helper  ){
 

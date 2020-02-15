@@ -22,7 +22,53 @@ public with sharing class LeadTriggerHandler {
 
 
     }
-
+	
+    //Ankita A: 10 Feb 2020: Populate date/time when status is changed
+    public static void populateDateTime(List<Lead> newLeadLst, Map<Id, Lead> oldMap){
+        List<Lead> leadToUpdate = new List<Lead>();
+       
+        for(Lead leadObject : [SELECT Id, Status, Intake_Sent_Datetime__c FROM Lead WHERE Id IN: newLeadLst]){
+            //If status is updated to Intake sent. update the date/time
+            if(leadObject.Status.equalsIgnoreCase('Intake Sent') && leadObject.Status != oldMap.get(leadObject.Id).Status){
+                leadObject.Intake_Sent_Datetime__c = System.now();
+				leadToUpdate.add(leadObject);
+            }
+        }
+        
+        update leadToUpdate;
+    }
+	
+    //Ankita A: 12 Feb 2020: Calculate Prospect Match for Lead when address, 
+    //specialty primary (Provider) and type of specialists GP needs ? (Practice) are updated.
+    public static void createProspectMatches(List<Lead> newLeadLst, Map<Id, Lead> oldMap){
+        
+        Set<Id> updatedLeads = new Set<Id>();
+        for(Lead leadObject : newLeadLst){
+            System.debug(leadObject.Address);
+            System.debug(leadObject.Street);
+            //If address is changed
+            if(leadObject.Street != oldMap.get(leadObject.Id).Street ||
+               leadObject.City != oldMap.get(leadObject.Id).City ||
+               leadObject.State != oldMap.get(leadObject.Id).State ||
+               leadObject.PostalCode != oldMap.get(leadObject.Id).PostalCode ||
+               leadObject.Country != oldMap.get(leadObject.Id).Country){
+                   updatedLeads.add(leadObject.Id);
+               }
+            //If Lead is of type Practice and Type of Specialists field is changed
+            if(leadObject.RecordTypeId == Utility.getsObjectRecordTypeId(Lead.getSobjectType(), 'Practice') &&
+              leadObject.Type_of_Specialists_they_want__c != oldMap.get(leadObject.Id).Type_of_Specialists_they_want__c){
+                  updatedLeads.add(leadObject.Id);
+              }
+            //If Lead is of type Provider and Primary specialty is changed
+            if(leadObject.RecordTypeId == Utility.getsObjectRecordTypeId(Lead.getSobjectType(), 'Provider') &&
+              leadObject.SPSPECIALTY__c != oldMap.get(leadObject.Id).SPSPECIALTY__c){
+                  updatedLeads.add(leadObject.Id);
+              }
+        }
+        if(updatedLeads.size() > 0){
+            CustomLeadConvertController.calculateProspectMatchesForLead(new List<Id>(updatedLeads), null);
+        }
+    } 
     public static void triggerIntakeFollowUp( List<Lead> leadLst , Map<Id,Lead> oldLeadMap ){
 
         Id spFollowUpTemplateId;
@@ -96,6 +142,13 @@ public with sharing class LeadTriggerHandler {
             } catch(Exception e){
                 isError = true;
                 logger.logException(e);
+                System.debug('exception '+e.getStackTraceString());
+            }
+            //Check if errorLst has any records
+            List<String> errorLst = SendSMSUtility.errorLst;
+            if(errorLst.size() > 0){
+                isError = true;
+                logger.log(string.join(errorLst, ' \n'));
             }
             logger.setStatus(isError ? 'Error' : 'Success');
             ApexLogger.commitLogs();

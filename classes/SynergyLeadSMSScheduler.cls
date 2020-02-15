@@ -58,6 +58,12 @@ public class SynergyLeadSMSScheduler implements Schedulable{
             isError = true;
             logger.logException(e);
         }
+        //Check if errorLst has any records
+        List<String> errorLst = SendSMSUtility.errorLst;
+        if(errorLst.size() > 0){
+            isError = true;
+            logger.log(string.join(errorLst, ' \n'));
+        }
         logger.setStatus(isError ? 'Error' : 'Success');
 		ApexLogger.commitLogs();
     }

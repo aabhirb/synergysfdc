@@ -42,6 +42,13 @@
             case 'queueMatch':
                 helper.enQueueMatch( component , event , helper  );
                 break;
+            //Name: Albina
+            //Date: 2/8/2020
+            //Description: added the fourth option 'prospect'   
+            case 'prospect':           
+                helper.enProspect(component, event, helper);
+                break;
+
 
         }
     },

@@ -352,21 +352,94 @@ public with sharing class OpportunityTriggerHandler {
         }
     }
     
-    //Ankita A: 23 Jan 2020: Update date/time fields when stage is updated
     public static void populateOppDatetimeFields(Map<Id, Opportunity> oldMap, List<Opportunity> oppNewList){
-        Set<Id> opptIds = new Set<Id>();
-        List<Opportunity> opptToUpdated = new List<Opportunity>();
-        for(Opportunity opptObject : oppNewList){
+        List<Opportunity> opptsToUpdated = new List<Opportunity>();
+       
+        for(Opportunity opptObject : [SELECT Id, StageName, Introduction_Datetime__c, Prep_Completion_Date__c, Specialist_Package__c FROM Opportunity WHERE Id IN: oppNewList]){
+            Boolean isUpdated = false;
             //If stagename is updated to Introduced
             if(opptObject.StageName.equalsIgnoreCase('Introduced') && opptObject.StageName != oldMap.get(opptObject.Id).StageName){
-                opptIds.add(opptObject.Id);
+                opptObject.Introduction_Datetime__c = System.now();
+                isUpdated = true;
+            }
+            
+            //If specialist package sent is true, update the date value
+            if(opptObject.Specialist_Package__c && opptObject.Specialist_Package__c != oldMap.get(opptObject.Id).Specialist_Package__c){
+                opptObject.Prep_Completion_Date__c = System.today();
+                isUpdated = true;
+            }
+            
+            if(isUpdated){
+                opptsToUpdated.add(opptObject);
             }
         }
-        for(Opportunity opptObject : [SELECT Id, Introduction_Datetime__c FROM Opportunity WHERE Id IN:opptIds]){
-            opptObject.Introduction_Datetime__c = System.now();
-            opptToUpdated.add(opptObject);
-        }
-        update opptToUpdated;
+        
+        update opptsToUpdated;
     }
+
+    //Ankita A: Send SMS to SP and GP 1 hour after intro sent out
+    public static void sendBusinessSMS(Map<Id, Opportunity> oldMap, List<Opportunity> oppNewList){
+        ApexLogger.Logger logger = ApexLogger.createLogger('Synergy Opportunity SMS :'+System.now());
+        Map<Id, Opportunity> introFollowUpToGP1hr = new Map<Id, Opportunity>();
+        Map<Id, Opportunity> introFollowupToSP1hr = new Map<Id, Opportunity>();
+
+        //Capture the opportunities with Send Introduction SMS as true
+        for(Opportunity opptObject : [SELECT Id, Send_Introduction_SMS__c,
+                                        GP_Contact__c, GP_Contact__r.Name, GP_Contact__r.MobilePhone, 
+                                        Primary_Contact__c, Primary_Contact__r.Name, Primary_Contact__r.MobilePhone,
+                                        GP_Contact__r.smagicinteract__SMSOptOut__c, Primary_Contact__r.smagicinteract__SMSOptOut__c
+                                        FROM Opportunity
+                                        WHERE Id IN: oppNewList
+                                    ]){
+            //If Send Introduction SMS is true and it's value has changed
+            if(opptObject.Send_Introduction_SMS__c && opptObject.Send_Introduction_SMS__c != oldMap.get(opptObject.Id).Send_Introduction_SMS__c){
+
+                //If GP contact has not opted out for SMS and MobilePhone is present, add to the list for sending SMS
+                if(!opptObject.GP_Contact__r.smagicinteract__SMSOptOut__c && String.isNotBlank(opptObject.GP_Contact__r.MobilePhone)){
+                    logger.log('Sending SMS to GP 1 hour after Introduction is sent '+opptObject.GP_Contact__r.Name);
+                    introFollowUpToGP1hr.put(opptObject.Id, opptObject);
+                }
+                //If SP contact has not opted out for SMS and MobilePhone is present, add to the list for sending SMS
+                if(!opptObject.Primary_Contact__r.smagicinteract__SMSOptOut__c && String.isNotBlank(opptObject.Primary_Contact__r.MobilePhone)){
+                    logger.log('Sending SMS to SP 1 hour after Introduction is sent '+opptObject.Primary_Contact__r.Name);
+                    introFollowupToSP1hr.put(opptObject.Id, opptObject);
+                }
+            }
+        }
+
+        //If the introFollowUpToGP1hr or introFollowupToSP1hr map has any elements
+        if(introFollowUpToGP1hr.size() > 0 || introFollowupToSP1hr.size() > 0){
+            //Query the SMS template
+            List<smagicinteract__SMS_Template__c> smsTemplates = [SELECT Id, smagicinteract__Name__c, smagicinteract__Text__c 
+                                                                    FROM smagicinteract__SMS_Template__c
+                                                                    WHERE smagicinteract__Name__c IN 
+                                                                    ('GP Introduction Follow up 1', 'SP Introduction Follow up 1')
+                                                                ];
+            Map<String, smagicinteract__SMS_Template__c> nameToTemplateMap = new Map<String, smagicinteract__SMS_Template__c>();
+            for(smagicinteract__SMS_Template__c template : smsTemplates){
+                nameToTemplateMap.put(template.smagicinteract__Name__c, template);
+            }
+            Boolean isError = false;
+            try{
+                //Call utility method to send SMS
+                SendSMSUtility.sendFollowupSMS(introFollowupToGP1hr, nameToTemplateMap.get('GP Introduction Follow up 1'), false); //isSP = false
+                SendSMSUtility.sendFollowupSMS(introFollowupToSP1hr, nameToTemplateMap.get('SP Introduction Follow up 1'), true);//isSP = true
+
+            } catch(Exception e){
+                isError = true;
+                logger.logException(e);
+            }
+            //Check if errorLst has any records
+            List<String> errorLst = SendSMSUtility.errorLst;
+            if(errorLst.size() > 0){
+                isError = true;
+                logger.log(string.join(errorLst, ' \n'));
+            }
+            logger.setStatus(isError ? 'Error' : 'Success');
+            ApexLogger.commitLogs();
+        }
+
+    }
+    
     
 }
